@@ -3,7 +3,8 @@ const app = express();
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-
+const matchesRouter = require('./src/routes/matches');
+require('dotenv').config();
 
 
 mongoose.connect(process.env.DB_CONNECTION_STRING, {
@@ -29,6 +30,7 @@ app.use((req, res, next) => {
     next();
 });
 
+app.use('/matches', matchesRouter);
 /* ERROR HANDLING */
 
 //

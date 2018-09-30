@@ -7,7 +7,7 @@ const matchSchema = mongoose.Schema({
     lobby_type: Number,
     players: [
         {
-            account_id: {type: Number, required: true},
+            account_id: Number,
             player_slot: {type: Number, required: true},
             hero_id: {type: Number, required: true}
         }
