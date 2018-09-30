@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const matchesRouter = require('./src/routes/matches');
+const tournamentsRouter = require('./src/routes/tournaments');
 require('dotenv').config();
 
 
@@ -31,6 +32,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/matches', matchesRouter);
+app.use('/tournaments', tournamentsRouter);
 /* ERROR HANDLING */
 
 //
