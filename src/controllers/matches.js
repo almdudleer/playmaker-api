@@ -12,7 +12,7 @@ exports.match_post_one = (req, res, next) => {
             key: process.env.STEAM_API_KEY
         }
     })
-        .then( resp => {
+        .then(resp => {
             console.log(resp.data);
             resp.data.result._id = new mongoose.Types.ObjectId;
             const match = new Match(resp.data.result);
@@ -37,4 +37,36 @@ exports.match_post_one = (req, res, next) => {
                 error: error
             });
         });
+};
+
+exports.match_get_all = (req, res, next) => {
+    Match.find()
+        .select('match_id start_time lobby_time players')
+        .exec()
+        .then(docs => {
+            const response = {
+                status: "ok",
+                counts: docs.length,
+                matches: docs
+            };
+            res.status(200).json(response);
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
+};
+exports.match_get_one = (req, res, next) => {
+    Match.findOne({match_id: req.params.matchId})
+        .select('match_id start_time lobby_time players')
+        .exec()
+        .then(doc => {
+            const response = {
+                status: "ok",
+                match: doc
+            };
+            res.status(200).json(response);
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
 };
