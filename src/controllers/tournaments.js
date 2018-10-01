@@ -26,3 +26,35 @@ exports.tournament_post_one = (req, res, next) => {
     })
 };
 
+exports.tournament_get_all = (req, res, next) => {
+    Tournament.find()
+        .select('name team_count prize_pool teams')
+        .exec()
+        .then(docs => {
+            const response = {
+                status: "ok",
+                counts: docs.length,
+                tournaments: docs
+            };
+            res.status(200).json(response);
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
+};
+
+exports.tournament_get_one = (req, res, next) => {
+    Tournament.findOne({_id: req.params.tournamentId})
+        .select('name team_count prize_pool teams')
+        .exec()
+        .then(doc => {
+            const response = {
+                status: "ok",
+                tournament: doc
+            };
+            res.status(200).json(response);
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
+}
