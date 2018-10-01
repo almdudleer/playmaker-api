@@ -2,11 +2,12 @@ const Match = require('../models/match');
 const http = require('http');
 const mongoose = require('mongoose');
 const axios = require('axios');
+const steamApi = require('../steamEndpoints');
 require('dotenv').config();
 
 exports.match_post_one = (req, res, next) => {
     //fetching data from Steam API
-    axios.get('http://api.steampowered.com/IDOTA2Match_570/GetMatchDetails/V001/', {
+    axios.get(steamApi.getMatchDetails, {
         params: {
             match_id: req.body.match_id,
             key: process.env.STEAM_API_KEY
