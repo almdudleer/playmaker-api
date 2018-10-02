@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const matchesRouter = require('./src/routes/matches');
 const tournamentsRouter = require('./src/routes/tournaments');
+const teamRouter = require('./src/routes/teams');
 require('dotenv').config();
 
 
@@ -12,6 +13,7 @@ mongoose.connect(process.env.DB_CONNECTION_STRING, {
     useNewUrlParser: true,
     useCreateIndex: true
 });
+mongoose.set('useFindAndModify', false);
 
 //HTTP request logger
 app.use(morgan('dev'));
@@ -33,6 +35,7 @@ app.use((req, res, next) => {
 
 app.use('/matches', matchesRouter);
 app.use('/tournaments', tournamentsRouter);
+app.use('/teams', teamRouter);
 /* ERROR HANDLING */
 
 //

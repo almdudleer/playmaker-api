@@ -1,4 +1,5 @@
 const Tournament = require('../models/tournament');
+const Team = require('../models/team');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
@@ -72,4 +73,37 @@ exports.tournament_delete_one = (req, res, next) => {
         .catch(err => {
             res.status(500).json({error: err})
         })
+};
+
+exports.tournament_add_team = (req, res, next) => {
+    Team.findById(req.body.teamId)
+        .exec()
+        .then(team => {
+            if (team) { //Если существиет команда с передаваемым Id
+                Tournament.findOneAndUpdate(
+                    {_id: req.params.tournamentId},
+                    {$addToSet: {teams: {_id: team._id, name: team.name}}}, //Если команда уже есть, ничего не изменится
+                    {new: true}
+                )
+                    .exec()
+                    .then(doc => {
+                        const response = {
+                            status: "ok",
+                            addedTeam: team,
+                            updatedTournament: doc
+                        };
+                        res.status(200).json(response);
+                    })
+                    .catch(err => {
+                        res.status(500).json({error: err})
+                    })
+            } else return res.status(404).json({
+                status: "error",
+                message: "team not found"
+            })
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        });
+
 };
