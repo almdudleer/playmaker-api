@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 
 const matchSchema = mongoose.Schema({
-    _id: mongoose.Schema.Types.ObjectId,
-    match_id: {type: Number, required: true, unique: true},
+    _id: Number,
     start_time: Number,
     lobby_type: Number,
     players: [

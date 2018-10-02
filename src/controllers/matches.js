@@ -15,7 +15,7 @@ exports.match_post_one = (req, res, next) => {
     })
         .then(resp => {
             console.log(resp.data);
-            resp.data.result._id = new mongoose.Types.ObjectId;
+            resp.data.result._id = resp.data.result.match_id;
             const match = new Match(resp.data.result);
             match.save().then(result => {
                 res.status(201).json({
