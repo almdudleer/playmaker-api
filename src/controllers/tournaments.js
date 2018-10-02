@@ -57,4 +57,19 @@ exports.tournament_get_one = (req, res, next) => {
         .catch(err => {
             res.status(500).json({error: err})
         })
-}
+};
+
+exports.tournament_delete_one = (req, res, next) => {
+    Tournament.deleteOne({_id: req.body.tournamentId})
+        .exec()
+        .then(_ => {
+            const response = {
+                status: "ok",
+                message: "deleted"
+            };
+            res.status(200).json(response);
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
+};

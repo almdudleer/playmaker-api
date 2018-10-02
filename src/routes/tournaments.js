@@ -8,5 +8,6 @@ router.get('/', TournamentsController.tournament_get_all);
 
 router.get('/:tournamentId', TournamentsController.tournament_get_one);
 
+router.delete('/', TournamentsController.tournament_delete_one);
 
 module.exports = router;
