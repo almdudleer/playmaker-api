@@ -11,6 +11,7 @@ const matchSchema = mongoose.Schema({
     radiant_score: Number,
     dire_score: Number,
     players: [{
+        _id: false,
         account_id: Number,
         player_slot: Number,
         hero_id: Number,
@@ -37,6 +38,7 @@ const matchSchema = mongoose.Schema({
         gold: Number,
         gold_spent: Number,
         ability_upgrades: [{
+            _id: false,
             ability: Number,
             time: Number,
             level: Number

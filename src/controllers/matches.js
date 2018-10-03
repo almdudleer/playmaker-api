@@ -14,7 +14,6 @@ exports.match_post_one = (req, res, next) => {
         }
     })
         .then(resp => {
-            console.log(resp.data);
             resp.data.result._id = resp.data.result.match_id;
             const match = new Match(resp.data.result);
             match.save().then(result => {
@@ -41,7 +40,7 @@ exports.match_post_one = (req, res, next) => {
 
 exports.match_get_all = (req, res, next) => {
     Match.find()
-        .select('match_id start_time lobby_time players')
+        .select('match_id start_time lobby_time players.player_slot players.account_id players.hero_id')
         .exec()
         .then(docs => {
             const response = {
