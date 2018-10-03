@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const tournamentSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     owner: {type: mongoose.Schema.Types.ObjectId, required: true},
+    description: String,
     name: {type: String, required: true, unique: true},
     team_count: {type: Number, required: true},
     prize_pool: Number,
