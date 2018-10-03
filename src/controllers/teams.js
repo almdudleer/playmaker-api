@@ -32,7 +32,7 @@ exports.team_get_all = (req, res, next) => {
             const response = {
                 status: "ok",
                 counts: docs.length,
-                tournaments: docs
+                team: docs
             };
             res.status(200).json(response);
         })
@@ -47,7 +47,7 @@ exports.team_get_one = (req, res, next) => {
         .then(doc => {
             const response = {
                 status: "ok",
-                tournament: doc
+                team: doc
             };
             res.status(200).json(response);
         })
