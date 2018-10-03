@@ -20,8 +20,7 @@ exports.match_post_one = (req, res, next) => {
             match.save().then(result => {
                 res.status(201).json({
                     status: "ok",
-                    message: "post /matches",
-                    addedMatch: match
+                    message: "post /matches"
                 });
             }).catch(error => {
                 console.log(error);
@@ -56,6 +55,7 @@ exports.match_get_all = (req, res, next) => {
             res.status(500).json({error: err})
         })
 };
+
 exports.match_get_one = (req, res, next) => {
     Match.findOne({match_id: req.params.matchId})
         .select('match_id start_time lobby_time players')
