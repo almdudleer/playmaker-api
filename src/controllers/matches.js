@@ -56,8 +56,7 @@ exports.match_get_all = (req, res, next) => {
 };
 
 exports.match_get_one = (req, res, next) => {
-    Match.findOne({match_id: req.params.matchId})
-        .select('match_id start_time lobby_time players')
+    Match.findOne({_id: req.params.matchId})
         .exec()
         .then(doc => {
             const response = {
