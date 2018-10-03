@@ -14,4 +14,6 @@ router.post('/:tournamentId/teams', TournamentsController.tournament_add_team);
 
 router.delete('/:tournamentId/teams', TournamentsController.tournament_delete_team);
 
+router.patch('/:tournamentId', TournamentsController.tournament_update);
+
 module.exports = router;

@@ -5,11 +5,13 @@ require('dotenv').config();
 
 exports.tournament_post_one = (req, res, next) => {
     const tournament = new Tournament({
+        owner: req.body.owner,
         _id: new mongoose.Types.ObjectId,
         name: req.body.name,
         team_count: req.body.team_count,
-        prize_pool: req.body.prize_pool
+        prize_pool: req.body.prize_pool,
     });
+    console.log(tournament.finished);
     tournament.save()
         .then(result => {
             console.log(result);
@@ -137,4 +139,27 @@ exports.tournament_delete_team = (req, res, next) => {
         .catch(err => {
             res.status(500).json({error: err})
         });
+};
+
+exports.tournament_update = (req, res, next) => {
+    Tournament.findOneAndUpdate(
+        {_id: req.params.tournamentId},
+        {
+            $set: {
+                description: req.body.description
+            }
+        },
+        {new: true}
+    )
+        .exec()
+        .then(doc => {
+            const response = {
+                status: "ok",
+                updatedTournament: doc
+            };
+            res.status(200).json(response);
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
 };
