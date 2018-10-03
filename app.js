@@ -15,6 +15,8 @@ mongoose.connect(process.env.DB_CONNECTION_STRING, {
 });
 mongoose.set('useFindAndModify', false);
 
+app.use(express.static(__dirname + '/dist/playmaker-web'))
+
 //HTTP request logger
 app.use(morgan('dev'));
 
