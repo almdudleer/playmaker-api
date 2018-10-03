@@ -7,8 +7,7 @@ const teamSchema = mongoose.Schema({
     players: {
         type: [
             {
-                _id: false,
-                account_id: {type: Number, required: true}
+                _id: {type: Number, required: true}
             }
         ],
     }
