@@ -1,39 +1,30 @@
+const {buildReplayUrl} = require('./util/utility');
 const axios = require('axios');
-const fs = require('fs');
-const bz2 = require('unbzip2-stream');
-const concat = require('concat-stream');
+const cp = require('child_process');
+require('dotenv').config();
 
-function fetchReplay(url) {
-    axios({
-        method: 'get',
-        url: 'http://replay183.valve.net/570/4148092764_1473198430.dem.bz2',
-        responseType: 'stream'
+
+function parseReplay(match_id) {
+    axios.get('https://api.opendota.com/api/replays', {
+        params: {
+            match_id: match_id,
+        }
     })
-        .then(response => {
-            response.data.pipe(bz2()).pipe(concat(replay => {
-                parseReplay(replay);
-                console.log("kek");
-            }));
+        .then(replay => {
+            let url = buildReplayUrl(replay.data[0].match_id, replay.data[0].cluster, replay.data[0].replay_salt);
+            cp.exec(
+                `curl --max-time 180 --fail ${url} | bunzip2 | curl -X POST -T - ${process.env.PARSER_HOST} | node src/processors/createParsedDataBlob.js ${match_id}`,
+                {shell: true, maxBuffer: 10 * 1024 * 1024},
+                (err, stdout) => {
+                    console.log(err);
+                    console.log(stdout);
+
+                },
+            );
         })
         .catch(err => {
             console.log(err);
-        });
-}
-
-function parseReplay(replay) {
-    axios({
-        method: 'post',
-        url: 'http://localhost:5600',
-        responseType: 'stream',
-        data: replay
-    })
-        .then(response => {
-            response.data.pipe(process.stdout);
         })
-        .catch(err => {
-            console.log(err);
-        });
 }
 
-
-fetchReplay(null);
+parseReplay(4063486691);
