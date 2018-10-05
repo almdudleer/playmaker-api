@@ -3,9 +3,10 @@ const readline = require('readline');
 // const processTeamfights = require('../processors/processTeamfights');
 // const processLogParse = require('../processors/processLogParse');
 // const processUploadProps = require('../processors/processUploadProps');
-// const processParsedData = require('../processors/processParsedData');
-processMetadata = require('./processMetadata');
-// const processExpand = require('../processors/processExpand');
+const processParsedData = require('./processParsedData');
+const processMetadata = require('./processMetadata');
+const fs = require('fs');
+const ParsedMatch = require('../models/parsedMatch');
 // const processDraftTimings = require('../processors/processDraftTimings');
 
 
@@ -78,6 +79,7 @@ function getParseSchema() {
                 randomed: false,
                 repicked: false,
                 pred_vict: false,
+                pos: [],
             })),
     };
 }
@@ -85,7 +87,11 @@ function getParseSchema() {
 function createParsedDataBlob(entries, matchId) {
     const meta = processMetadata(entries);
     meta.match_id = matchId;
-    console.log(meta);
+    entries.forEach((e) => {
+        e.time -= meta.game_zero;
+    });
+    const result = processParsedData(entries, getParseSchema(), meta);
+    return result;
 }
 
 const entries = [];
@@ -96,7 +102,6 @@ const parseStream = readline.createInterface({
 });
 let i = 0;
 parseStream.on('line', (e) => {
-    i++;
     e = JSON.parse(e);
     entries.push(e);
     if (e.type === 'epilogue') {
@@ -104,10 +109,9 @@ parseStream.on('line', (e) => {
     }
 });
 parseStream.on('close', () => {
-    console.log(i);
     if (complete) {
-        console.log("complete");
-        createParsedDataBlob(entries, matchId);
+        //createParsedDataBlob(entries, matchId);
+        process.stdout.write(JSON.stringify(createParsedDataBlob(entries, matchId)));
     } else {
         process.exit(1);
     }

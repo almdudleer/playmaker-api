@@ -2,7 +2,8 @@ const {buildReplayUrl} = require('./util/utility');
 const axios = require('axios');
 const cp = require('child_process');
 require('dotenv').config();
-
+const ParsedMatch = require('./models/parsedMatch');
+const fs = require('fs');
 
 function parseReplay(match_id) {
     axios.get('https://api.opendota.com/api/replays', {
@@ -19,10 +20,10 @@ function parseReplay(match_id) {
                     if (err) {
                         return console.log(err);
                     }
+                    //console.log(stdout);
                     const parsedMatch = JSON.parse(stdout);
-                    parsedMatch.match_id = match_id;
-
-
+                    parsedMatch._id = match_id;
+                    fs.createWriteStream('./l.json').write(JSON.stringify(parsedMatch));
                 },
             );
         })
