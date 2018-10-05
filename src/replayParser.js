@@ -16,8 +16,12 @@ function parseReplay(match_id) {
                 `curl --max-time 180 --fail ${url} | bunzip2 | curl -X POST -T - ${process.env.PARSER_HOST} | node src/processors/createParsedDataBlob.js ${match_id}`,
                 {shell: true, maxBuffer: 10 * 1024 * 1024},
                 (err, stdout) => {
-                    console.log(err);
-                    console.log(stdout);
+                    if (err) {
+                        return console.log(err);
+                    }
+                    const parsedMatch = JSON.parse(stdout);
+                    parsedMatch.match_id = match_id;
+
 
                 },
             );
