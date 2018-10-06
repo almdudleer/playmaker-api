@@ -1,4 +1,5 @@
 const Team = require('../models/team');
+const User = require('../models/user');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
@@ -42,7 +43,8 @@ exports.team_get_all = (req, res, next) => {
 };
 
 exports.team_get_one = (req, res, next) => {
-    Tournament.findOne({_id: req.params.tournamentId})
+    Team.findOne({_id: req.params.teamId})
+        .populate('players')
         .exec()
         .then(doc => {
             const response = {
@@ -54,6 +56,53 @@ exports.team_get_one = (req, res, next) => {
         .catch(err => {
             res.status(500).json({error: err})
         })
+};
+
+exports.team_delete_one = (req, res, next) => {
+    Team.deleteOne({_id: req.body.teamId})
+        .exec()
+        .then(doc => {
+            const response = {
+                status: "ok",
+                message: "deleted"
+            };
+            res.status(200).json(response);
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
+};
+
+exports.team_add_player = (req, res, next) => {
+    User.findById(req.body.userId)
+        .exec()
+        .then(user => {
+            if (user) { //Если существует игрок с таким id
+                Team.findOneAndUpdate(
+                    {_id: req.params.teamId},
+                    {$addToSet: {players: {_id: user._id}}}, //Если игрок уже есть в команде, ничего не изменится
+                    {new: true}
+                )
+                    .exec()
+                    .then(doc => {
+                        const response = {
+                            status: "ok",
+                            addedTeam: team,
+                            updatedTournament: doc
+                        };
+                        res.status(200).json(response);
+                    })
+                    .catch(err => {
+                        res.status(500).json({error: err})
+                    })
+            } else return res.status(404).json({
+                status: "error",
+                message: "user not found"
+            })
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        });
 };
 
 
