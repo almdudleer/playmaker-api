@@ -110,7 +110,7 @@ exports.team_delete_player = (req, res, next) => {
         .exec()
         .then(user => {
             if (user) { //Если существует пользователь с передаваемым Id
-                Tournament.findOneAndUpdate(
+                Team.findOneAndUpdate(
                     {_id: req.params.teamId},
                     {$pull: {players: {_id: user._id}}}, //Удаляем пользователя из команды
                     {new: true}
