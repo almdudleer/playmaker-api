@@ -31,7 +31,7 @@ exports.tournament_post_one = (req, res, next) => {
 
 exports.tournament_get_all = (req, res, next) => {
     Tournament.find()
-        .select('name team_count prize_pool teams')
+        .select('name team_count prize_pool teams bracket')
         .exec()
         .then(docs => {
             const response = {
@@ -48,7 +48,7 @@ exports.tournament_get_all = (req, res, next) => {
 
 exports.tournament_get_one = (req, res, next) => {
     Tournament.findOne({_id: req.params.tournamentId})
-        .select('name team_count prize_pool teams')
+        .select('name team_count prize_pool teams bracket')
         .exec()
         .then(doc => {
             const response = {
@@ -158,6 +158,32 @@ exports.tournament_update = (req, res, next) => {
                 updatedTournament: doc
             };
             res.status(200).json(response);
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
+};
+
+exports.tournament_start = (req, res, next) => {
+    Tournament.findOne({_id: req.params.tournamentId})
+        .exec()
+        .then(tournament => {
+            console.log("1");
+            if (tournament.started) return res.status(200).json({message: "Tournament already started "});
+            tournament.generateBracket();
+            tournament.started = true;
+            tournament.save()
+                .then(tournament => {
+                    const response = {
+                        status: "ok",
+                        updatedTournament: tournament
+                    };
+                    res.status(200).json(response);
+                })
+                .catch(err => {
+                    res.status(500).json({error: err})
+                });
+
         })
         .catch(err => {
             res.status(500).json({error: err})
