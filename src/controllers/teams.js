@@ -84,11 +84,11 @@ exports.team_add_player = (req, res, next) => {
                     {new: true}
                 )
                     .exec()
-                    .then(doc => {
+                    .then(team => {
                         const response = {
                             status: "ok",
-                            addedTeam: team,
-                            updatedTournament: doc
+                            addedPlayer: user,
+                            updatedTeam: team
                         };
                         res.status(200).json(response);
                     })
@@ -105,5 +105,36 @@ exports.team_add_player = (req, res, next) => {
         });
 };
 
+exports.team_delete_player = (req, res, next) => {
+    User.findById(req.body.userId)
+        .exec()
+        .then(user => {
+            if (user) { //Если существует пользователь с передаваемым Id
+                Tournament.findOneAndUpdate(
+                    {_id: req.params.teamId},
+                    {$pull: {players: {_id: user._id}}}, //Удаляем пользователя из команды
+                    {new: true}
+                )
+                    .exec()
+                    .then(team => {
+                        const response = {
+                            status: "ok",
+                            removedPlayer: user,
+                            updatedTeam: team
+                        };
+                        res.status(200).json(response);
+                    })
+                    .catch(err => {
+                        res.status(500).json({error: err})
+                    })
+            } else return res.status(404).json({
+                status: "error",
+                message: "user not found"
+            })
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        });
+};
 
 
