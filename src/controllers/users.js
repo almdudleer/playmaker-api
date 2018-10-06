@@ -39,3 +39,34 @@ exports.user_update = (req, res, next) => {
         }
     )
 };
+
+exports.user_restore_password = (req, res, next) => {
+    User.findOne({email: req.query.userEmail}) //проверить, что email существует
+        .exec()
+        .then(doc => {
+            //TODO: if doc !=null send e-mail with password or else
+            const response = {
+                status: doc ? "ok" : "fail"
+            };
+            res.status(200).json(response);
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
+};
+
+//basic auth
+exports.user_auth = (req, res, next) => {
+    User.findOne({email: req.query.userEmail, password: req.query.userPassword})
+        .exec()
+        .then(doc => {
+            //TODO: encrypt password
+            const response = {
+                status: doc ? "ok" : "fail"
+            };
+            res.status(200).json(response);
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
+};
