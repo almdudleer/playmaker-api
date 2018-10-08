@@ -36,6 +36,9 @@ app.use((req, res, next) => {
 app.use('/matches', matchesRouter);
 app.use('/tournaments', tournamentsRouter);
 app.use('/teams', teamRouter);
+//test helper
+app.use('/test', require("./src/routes/test"));
+
 /* ERROR HANDLING */
 
 //

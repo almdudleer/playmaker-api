@@ -69,3 +69,18 @@ exports.match_get_one = (req, res, next) => {
             res.status(500).json({error: err})
         })
 };
+
+exports.match_delete_one = (req, res, next) => {
+    Match.deleteOne({_id: req.body.matchId})
+        .exec()
+        .then(_ => {
+            const response = {
+                status: "ok",
+                message: "deleted"
+            };
+            res.status(200).json(response);
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
+};

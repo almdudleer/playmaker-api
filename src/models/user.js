@@ -6,8 +6,8 @@ const userSchema = mongoose.Schema({
     email: {type: String, required: true, unique:true},
     password: {type: String, required: true},
     account_id: {type: Number, unique: true},
-    fav_tournaments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tournament' }],
-    fav_teams: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tournament' }]
+    selected_matches: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Match' }],
+    selected_tournaments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tournament' }]
 });
 
 module.exports = mongoose.model('User', userSchema);

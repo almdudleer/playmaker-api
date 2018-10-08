@@ -1,0 +1,27 @@
+team_post_one -- add a team
+team_get_all -- get an array of teams
+team_get_one -- get a team by id
+team_delete_one -- delete a team by id
+team_add_player -- add a player to the team
+team_delete_player -- delete a player from the team
+tournament_post_one -- add a tournament
+tournament_get_all -- get an array of tournaments
+tournament_get_one -- get a tournament by id
+tournament_delete_one -- delete a tournament by id
+tournament_add_team -- add a team to the tournament
+tournament_delete_team -- delete a team from the tournament
+tournament_update -- update a tournament due to "description" parameter, return modified document
+tournament_start -- set tournament.started to true
+match_post_one -- add a match
+match_get_all -- get an array of matchs
+match_get_one -- get a match by id
+match_delete -- delete match //not tested!
+user_signup -- add a user w nickname, email, password, account_id
+user_update -- update email, password and account_id
+user_auth -- db check e-mail password pair match
+user_restore_password -- check if an e-mail exists and send a letter
+user_get_info -- get arrays of selected + confirm id + account_id
+user_add_match
+user_delete_match
+user_add_tournament
+user_delete_tournament -- 4 operations with selected things
