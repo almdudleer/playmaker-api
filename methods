@@ -20,3 +20,8 @@ user_signup -- add a user w nickname, email, password, account_id
 user_update -- update email, password and account_id
 user_auth -- db check e-mail password pair match
 user_restore_password -- check if an e-mail exists and send a letter
+user_get_info -- get arrays of selected + confirm id + account_id
+user_add_match
+user_delete_match
+user_add_tournament
+user_delete_tournament -- 4 operations with selected things
