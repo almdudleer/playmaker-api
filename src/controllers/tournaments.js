@@ -89,6 +89,7 @@ exports.tournament_add_team = (req, res, next) => {
         .then(team => {
             if (!team) {
                 session.abortTransaction();
+                session.endSession();
                 return res.status(404).json({
                     status: "error",
                     message: "team not found"
@@ -123,6 +124,8 @@ exports.tournament_add_team = (req, res, next) => {
             }
         })
         .catch(err => {
+            session.abortTransaction();
+            session.endSession();
             res.status(500).json({error: err})
         });
 };

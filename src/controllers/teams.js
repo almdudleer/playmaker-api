@@ -74,6 +74,58 @@ exports.team_delete_one = (req, res, next) => {
 };
 
 exports.team_add_player = (req, res, next) => {
+    let session = null;
+    let response = null;
+    mongoose.startSession()
+        .then(_session => {
+            session = _session;
+            session.startTransaction();
+            return User.findById(req.body.userId);
+        })
+        .then(team => {
+            if (!team) {
+                session.abortTransaction();
+                session.endSession();
+
+                return res.status(404).json({
+                    status: "error",
+                    message: "team not found"
+                });
+            }
+            return Team.findOneAndUpdate(
+                {_id: req.params.teamId},
+                {$addToSet: {players: {_id: user._id}}}, //Если игрок уже есть в команде, ничего не изменится
+                {new: true}
+            ).session(session);
+        })
+        .then(team => {
+            response = {
+                status: "ok",
+                addedPlayer: user,
+                updatedTeam: team
+            };
+            return User.findById(req.body.userId);
+        })
+        .then(user => {
+            if (user) {
+                session.commitTransaction();
+                session.endSession();
+                return res.status(200).json(response);
+            } else {
+                session.abortTransaction();
+                session.endSession();
+                return res.status(404).json({
+                    status: "error",
+                    message: "user not found"
+                })
+            }
+        })
+        .catch(err => {
+            session.abortTransaction();
+            session.endSession();
+            res.status(500).json({error: err})
+        });
+    ///
     User.findById(req.body.userId)
         .exec()
         .then(user => {
@@ -106,35 +158,23 @@ exports.team_add_player = (req, res, next) => {
 };
 
 exports.team_delete_player = (req, res, next) => {
-    User.findById(req.body.userId)
+    Team.findOneAndUpdate(
+        {_id: req.params.teamId},
+        {$pull: {players: {_id: req.body.userId}}}, //Удаляем пользователя из команды
+        {new: true}
+    )
         .exec()
-        .then(user => {
-            if (user) { //Если существует пользователь с передаваемым Id
-                Team.findOneAndUpdate(
-                    {_id: req.params.teamId},
-                    {$pull: {players: {_id: user._id}}}, //Удаляем пользователя из команды
-                    {new: true}
-                )
-                    .exec()
-                    .then(team => {
-                        const response = {
-                            status: "ok",
-                            removedPlayer: user,
-                            updatedTeam: team
-                        };
-                        res.status(200).json(response);
-                    })
-                    .catch(err => {
-                        res.status(500).json({error: err})
-                    })
-            } else return res.status(404).json({
-                status: "error",
-                message: "user not found"
-            })
+        .then(team => {
+            const response = {
+                status: "ok",
+                removedPlayer: user,
+                updatedTeam: team
+            };
+            res.status(200).json(response);
         })
         .catch(err => {
             res.status(500).json({error: err})
-        });
+        })
 };
 
 
