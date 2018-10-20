@@ -78,31 +78,49 @@ exports.tournament_delete_one = (req, res, next) => {
 };
 
 exports.tournament_add_team = (req, res, next) => {
-    Team.findById(req.body.teamId)
-        .exec()
+    let session = null;
+    let response = null;
+    mongoose.startSession()
+        .then(_session => {
+            session = _session;
+            session.startTransaction();
+            return Team.findById(req.body.teamId);
+        })
         .then(team => {
-            if (team) { //Если существует команда с передаваемым Id
-                Tournament.findOneAndUpdate(
-                    {_id: req.params.tournamentId},
-                    {$addToSet: {teams: {_id: team._id, name: team.name}}}, //Если команда уже есть, ничего не изменится
-                    {new: true}
-                )
-                    .exec()
-                    .then(doc => {
-                        const response = {
-                            status: "ok",
-                            addedTeam: team,
-                            updatedTournament: doc
-                        };
-                        res.status(200).json(response);
-                    })
-                    .catch(err => {
-                        res.status(500).json({error: err})
-                    })
-            } else return res.status(404).json({
-                status: "error",
-                message: "team not found"
-            })
+            if (!team) {
+                session.abortTransaction();
+                return res.status(404).json({
+                    status: "error",
+                    message: "team not found"
+                });
+            }
+            return Tournament.findOneAndUpdate(
+                {_id: req.params.tournamentId},
+                {$addToSet: {teams: {_id: team._id}}}, //Если команда уже есть, ничего не изменится
+                {new: true}
+            ).session(session);
+        })
+        .then(doc => {
+            response = {
+                status: "ok",
+                addedTeam: team,
+                updatedTournament: doc
+            };
+            return Team.findById(req.body.teamId)
+        })
+        .then(team => {
+            if (team) {
+                session.commitTransaction();
+                session.endSession();
+                return res.status(200).json(response);
+            } else {
+                session.abortTransaction();
+                session.endSession();
+                return res.status(404).json({
+                    status: "error",
+                    message: "team not found"
+                })
+            }
         })
         .catch(err => {
             res.status(500).json({error: err})
@@ -110,35 +128,23 @@ exports.tournament_add_team = (req, res, next) => {
 };
 
 exports.tournament_delete_team = (req, res, next) => {
-    Team.findById(req.body.teamId)
+    Tournament.findOneAndUpdate(
+        {_id: req.params.tournamentId},
+        {$pull: {teams: {_id: req.body.teamId}}}, //Удаляем команду с турнира
+        {new: true}
+    )
         .exec()
-        .then(team => {
-            if (team) { //Если существует команда с передаваемым Id
-                Tournament.findOneAndUpdate(
-                    {_id: req.params.tournamentId},
-                    {$pull: {teams: {_id: team._id}}}, //Удаляем команду с турнира
-                    {new: true}
-                )
-                    .exec()
-                    .then(doc => {
-                        const response = {
-                            status: "ok",
-                            removedTeam: team,
-                            updatedTournament: doc
-                        };
-                        res.status(200).json(response);
-                    })
-                    .catch(err => {
-                        res.status(500).json({error: err})
-                    })
-            } else return res.status(404).json({
-                status: "error",
-                message: "team not found"
-            })
+        .then(doc => {
+            const response = {
+                status: "ok",
+                removedTeam: team,
+                updatedTournament: doc
+            };
+            res.status(200).json(response);
         })
         .catch(err => {
             res.status(500).json({error: err})
-        });
+        })
 };
 
 exports.tournament_update = (req, res, next) => {

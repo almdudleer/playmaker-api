@@ -12,8 +12,8 @@ const tournamentSchema = mongoose.Schema({
     winner_team: {type: mongoose.Schema.Types.ObjectId, default: null},
     teams: [
         {
-            _id: mongoose.Schema.Types.ObjectId,
-            name: {type: String, required: true}
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Team'
         }
     ],
     bracket: [{
