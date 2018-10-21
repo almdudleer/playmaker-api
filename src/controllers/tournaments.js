@@ -88,12 +88,7 @@ exports.tournament_add_team = (req, res, next) => {
         })
         .then(team => {
             if (!team) {
-                session.abortTransaction();
-                session.endSession();
-                return res.status(404).json({
-                    status: "error",
-                    message: "team not found"
-                });
+               throw new Error("team not found");
             }
             return Tournament.findOneAndUpdate(
                 {_id: req.params.tournamentId},
@@ -104,24 +99,20 @@ exports.tournament_add_team = (req, res, next) => {
         .then(doc => {
             response = {
                 status: "ok",
-                addedTeam: team,
                 updatedTournament: doc
             };
             return Team.findById(req.body.teamId)
         })
         .then(team => {
             if (team) {
-                session.commitTransaction();
-                session.endSession();
-                return res.status(200).json(response);
+                return session.commitTransaction();
             } else {
-                session.abortTransaction();
-                session.endSession();
-                return res.status(404).json({
-                    status: "error",
-                    message: "team not found"
-                })
+                throw new Error('team was deleted');
             }
+        })
+        .then(_ => {
+            session.endSession();
+            return res.status(200).json(response);
         })
         .catch(err => {
             session.abortTransaction();

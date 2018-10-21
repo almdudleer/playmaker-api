@@ -82,15 +82,9 @@ exports.team_add_player = (req, res, next) => {
             session.startTransaction();
             return User.findById(req.body.userId);
         })
-        .then(team => {
-            if (!team) {
-                session.abortTransaction();
-                session.endSession();
-
-                return res.status(404).json({
-                    status: "error",
-                    message: "team not found"
-                });
+        .then(user => {
+            if (!user) {
+                throw new Error("user not found");
             }
             return Team.findOneAndUpdate(
                 {_id: req.params.teamId},
@@ -101,60 +95,27 @@ exports.team_add_player = (req, res, next) => {
         .then(team => {
             response = {
                 status: "ok",
-                addedPlayer: user,
                 updatedTeam: team
             };
             return User.findById(req.body.userId);
         })
         .then(user => {
             if (user) {
-                session.commitTransaction();
-                session.endSession();
-                return res.status(200).json(response);
+                return session.commitTransaction();
             } else {
-                session.abortTransaction();
-                session.endSession();
-                return res.status(404).json({
-                    status: "error",
-                    message: "user not found"
-                })
+                throw new Error('user was deleted');
             }
+        })
+        .then(_ => {
+            session.endSession();
+            return res.status(200).json(response);
         })
         .catch(err => {
             session.abortTransaction();
             session.endSession();
             res.status(500).json({error: err})
         });
-    ///
-    User.findById(req.body.userId)
-        .exec()
-        .then(user => {
-            if (user) { //Если существует игрок с таким id
-                Team.findOneAndUpdate(
-                    {_id: req.params.teamId},
-                    {$addToSet: {players: {_id: user._id}}}, //Если игрок уже есть в команде, ничего не изменится
-                    {new: true}
-                )
-                    .exec()
-                    .then(team => {
-                        const response = {
-                            status: "ok",
-                            addedPlayer: user,
-                            updatedTeam: team
-                        };
-                        res.status(200).json(response);
-                    })
-                    .catch(err => {
-                        res.status(500).json({error: err})
-                    })
-            } else return res.status(404).json({
-                status: "error",
-                message: "user not found"
-            })
-        })
-        .catch(err => {
-            res.status(500).json({error: err})
-        });
+
 };
 
 exports.team_delete_player = (req, res, next) => {
