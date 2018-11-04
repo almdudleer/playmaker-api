@@ -48,6 +48,7 @@ exports.tournament_get_all = (req, res, next) => {
 
 exports.tournament_get_one = (req, res, next) => {
     Tournament.findOne({_id: req.params.tournamentId})
+        .populate('teams')
         .select('name teamCount prizePool teams bracket')
         .exec()
         .then(doc => {
