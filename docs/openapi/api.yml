@@ -1,0 +1,447 @@
+openapi: 3.0.2
+info:
+  version: 1.0.0
+  title: "Playmaker API"
+
+servers:
+- url: http://localhost:3000
+  description: 'Локальный сервер'
+
+paths:
+  /teams:
+    get:
+      tags:
+        - TEAMS
+      summary: "GET /teams"
+      description: "Get team list"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  count:
+                    type: integer
+                    example: 1
+                  teams:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Team"
+                    minItems: 1
+        500:
+          $ref: "#/components/responses/Error"
+    post:
+      tags:
+      - TEAMS
+      summary: "POST /teams"
+      description: "Add new team"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                name:
+                  type: String
+                  required: true
+                  example: "Natus Vincere"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: String
+                    example: ok
+                  addedTeam:
+                    type: object
+                    $ref: "#/components/schemas/Team"
+        500:
+          $ref: "#/components/responses/Error"
+    delete:
+      tags:
+      - TEAMS
+      summary: "DELETE /teams"
+      description: "Delete team"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                teamId:
+                  type: ObjectId
+                  example: "507f1f77bcf86cd799439018"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: String
+                    example: ok
+        500:
+          $ref: "#/components/responses/Error"
+  /teams/{teamId}:
+    get:
+      tags:
+      - TEAMS
+      summary: "GET /teams/{teamId}"
+      parameters:
+      - in: path
+        name: teamId
+        required: true
+        schema:
+          type: ObjectId
+      description: "Get team info"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  team:
+                    $ref: "#/components/schemas/Team"
+        500:
+          $ref: "#/components/responses/Error"
+  /teams/{teamId}/players:
+    post:
+      tags:
+      - TEAMS
+      summary: "POST /teams/{teamId}/players"
+      parameters:
+      - in: path
+        name: teamId
+        required: true
+        schema:
+          type: ObjectId
+      description: "Add player to team"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                userId:
+                  type: ObjectId
+                  required: true
+                  example: "507f1f77bcf86cd799439011"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  updatedTeam:
+                    type: object
+                    $ref: "#/components/schemas/Team"
+        500:
+          $ref: "#/components/responses/Error"
+    delete:
+      tags:
+      - TEAMS
+      summary: "DELETE /teams/{teamId}/players"
+      parameters:
+      - in: path
+        name: teamId
+        required: true
+        schema:
+          type: ObjectId
+      description: "Delete player from team"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                userId:
+                  type: ObjectId
+                  required: true
+                  example: "507f1f77bcf86cd799439011"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  removedPlayer:
+                    type: ObjectId
+                    example: "507f1f77bcf86cd799439011"
+                  updatedTeam:
+                    type: object
+                    $ref: "#/components/schemas/Team"
+        500:
+          $ref: "#/components/responses/Error"
+  /tournaments:
+    get:
+      tags:
+      - TOURNAMENTS
+      summary: "GET /tournaments"
+      description: "Get tournament list"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  count:
+                    type: integer
+                    example: 1
+                  tournaments:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/TournamentMin"
+                    minItems: 1
+        500:
+          $ref: "#/components/responses/Error"
+    post:
+      tags:
+      - TOURNAMENTS
+      summary: "POST /tournaments"
+      description: "Add new tournament"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                team_count:
+                  type: integer
+                  required: true
+                  example: 16
+                prizePool:
+                  type: integer
+                  required: true
+                  example: 300000
+                name:
+                  type: String
+                  required: true
+                  example: "ITMO Cup"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: String
+                    example: ok
+                  addedTournament:
+                    type: object
+                    $ref: "#/components/schemas/Tournament"
+        500:
+          $ref: "#/components/responses/Error"
+    delete:
+      tags:
+      - TOURNAMENTS
+      summary: "DELETE /tournaments"
+      description: "Delete tournament"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                tournamentId:
+                  type: ObjectId
+                  example: "507f1f77bcf86cd799439012"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: String
+                    example: ok
+        500:
+          $ref: "#/components/responses/Error"
+  /tournaments/{tournamentId}:
+    get:
+      tags:
+      - TOURNAMENTS
+      summary: "GET /tournaments/{tournamentId}"
+      description: "Get tournament info"
+      parameters:
+      - in: path
+        name: tournamentId
+        required: true
+        schema:
+          type: ObjectId
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  tournament:
+                      $ref: "#/components/schemas/Tournament"
+        500:
+          $ref: "#/components/responses/Error"
+    patch:
+      tags:
+      - TOURNAMENTS
+      summary: "GET /tournaments/{tournamentId}"
+      description: "Update tournament info"
+      parameters:
+      - in: path
+        name: tournamentId
+        required: true
+        schema:
+          type: ObjectId
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                description:
+                  type: string
+                  example: "Турнир за автомат по пипу"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  updatedTournament:
+                    $ref: "#/components/schemas/Tournament"
+        500:
+          $ref: "#/components/responses/Error"
+
+components:
+  responses:
+    Error:
+      content:
+        application/json:
+          schema:
+            properties:
+              status:
+                type: String
+                example: "error"
+              error:
+                type: object
+  schemas:
+    Team:
+      type: object
+      properties:
+        _id:
+          type: ObjectId
+          example: "507f1f77bcf86cd799439010"
+        name:
+          type: String
+          example: "Natus Vincere"
+        teamOwner:
+          type: ObjectId
+          example: "507f1f77bcf86cd799439013"
+        players:
+          type: array
+          items:
+            $ref: "#/components/schemas/Player"
+          minItems: 2
+    Player:
+      type: object
+      properties:
+        _id:
+          type: ObjectId
+          example: "507f1f77bcf86cd799439011"
+        nickname:
+          type: string
+          example: "Bleizard"
+    Tournament:
+      type: object
+      properties:
+        _id:
+          type: ObjectId
+          example: "507f1f77bcf86cd799439017"
+        owner:
+          type: ObjectId
+          example: "507f1f77bcf86cd799439011"
+        description:
+          type: string
+          example: "The best tournament in the world"
+        name:
+          type: string
+          example: "ITMO Cup"
+        teamCount:
+          type: integer
+          example: 16
+        prizePool:
+          type: integer
+          example: 300000
+        finished:
+          type: boolean
+          example: false
+        started:
+          type: boolean
+          example: false
+        winnerTeam:
+          type: ObjectId
+          example: null
+        teams:
+          type: array
+          items:
+            $ref: "#/components/schemas/Team"
+        bracket:
+          type: array
+          items:
+            type: object
+            properties:
+              _id:
+                type: integer
+                example: 13326458
+              team1:
+                type: ObjectId
+                example: "507f1f77bcf86cd799439125"
+              team2:
+                type: ObjectId
+                example: "507f1f77bcf86cd799439180"
+              stage:
+                type: integer
+                example: 8
+              parantMatch:
+                type: integer
+                example: 154649485
+    TournamentMin:
+      type: object
+      properties:
+        _id:
+          type: ObjectId
+          example: "507f1f77bcf86cd799439017"
+        description:
+          type: string
+          example: "The best tournament in the world"
+        name:
+          type: string
+          example: "ITMO Cup"
+        teamCount:
+          type: integer
+          example: 16
+        prizePool:
+          type: integer
+          example: 300000
+        finished:
+          type: boolean
+          example: false
+        started:
+          type: boolean
+          example: false
+        winnerTeam:
+          type: ObjectId
+          example: null
