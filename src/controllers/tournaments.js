@@ -8,14 +8,14 @@ exports.tournament_post_one = (req, res, next) => {
         owner: req.body.owner,
         _id: new mongoose.Types.ObjectId,
         name: req.body.name,
-        team_count: req.body.team_count,
-        prize_pool: req.body.prize_pool,
+        teamCount: req.body.teamCount,
+        prizePool: req.body.prizePool,
     });
     console.log(tournament.finished);
     tournament.save()
         .then(result => {
             console.log(result);
-            res.status(201).json({
+            res.status(200).json({
                 status: "ok",
                 message: "post /tournaments",
                 addedTournament: tournament
@@ -31,7 +31,7 @@ exports.tournament_post_one = (req, res, next) => {
 
 exports.tournament_get_all = (req, res, next) => {
     Tournament.find()
-        .select('name team_count prize_pool teams bracket')
+        .select('name teamCount prizePool teams bracket')
         .exec()
         .then(docs => {
             const response = {
@@ -48,7 +48,7 @@ exports.tournament_get_all = (req, res, next) => {
 
 exports.tournament_get_one = (req, res, next) => {
     Tournament.findOne({_id: req.params.tournamentId})
-        .select('name team_count prize_pool teams bracket')
+        .select('name teamCount prizePool teams bracket')
         .exec()
         .then(doc => {
             const response = {

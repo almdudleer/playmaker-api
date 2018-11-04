@@ -5,11 +5,11 @@ const tournamentSchema = mongoose.Schema({
     owner: {type: mongoose.Schema.Types.ObjectId, required: true},
     description: String,
     name: {type: String, required: true, unique: true},
-    team_count: {type: Number, required: true},
-    prize_pool: Number,
+    teamCount: {type: Number, required: true},
+    prizePool: Number,
     finished: {type: Boolean, default: false},
     started: {type: Boolean, default: false},
-    winner_team: {type: mongoose.Schema.Types.ObjectId, default: null},
+    winnerTeam: {type: mongoose.Schema.Types.ObjectId, default: null},
     teams: [
         {
             type: mongoose.Schema.Types.ObjectId,
@@ -21,7 +21,7 @@ const tournamentSchema = mongoose.Schema({
         team1: mongoose.Schema.Types.ObjectId, //команды участницы
         team2: mongoose.Schema.Types.ObjectId,
         stage: {type: Number, required: true}, //стадия сетки (16 = 1/16, 4=1/4, 1=финал)
-        parent_match: {type: Number, required: true}, //_id следующего по сетке матча
+        parentMatch: {type: Number, required: true}, //_id следующего по сетке матча
     }]
 });
 
@@ -33,17 +33,17 @@ tournamentSchema.methods.generateBracket = function () {
     let stage = bracketSize / 2;
     let offset = stage;
     let prevOffset = 0;
-    let match_num = 1;
+    let matchNum = 1;
 
     while (stage >= 1) {
         for (let i = 0; i < stage; i++) {
             const match = {
-                _id: match_num,
+                _id: matchNum,
                 stage: stage,
-                parent_match: offset + Math.ceil((match_num - prevOffset) / 2),
+                parentMatch: offset + Math.ceil((matchNum - prevOffset) / 2),
             };
             this.bracket.push(match);
-            match_num++;
+            matchNum++;
         }
         bracketSize /= 2;
         stage /= 2;

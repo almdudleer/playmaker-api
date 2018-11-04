@@ -7,12 +7,12 @@ exports.team_post_one = (req, res, next) => {
     const team = new Team({
         _id: new mongoose.Types.ObjectId,
         name: req.body.name,
-        team_owner: req.body.team_owner
+        teamOwner: req.body.teamOwner
     });
     team.save()
         .then(result => {
             console.log(result);
-            res.status(201).json({
+            res.status(200).json({
                 status: "ok",
                 message: "post /teams",
                 addedTeam: team
@@ -28,23 +28,25 @@ exports.team_post_one = (req, res, next) => {
 
 exports.team_get_all = (req, res, next) => {
     Team.find()
+        .populate('players', '_id nickname')
         .exec()
         .then(docs => {
             const response = {
                 status: "ok",
                 counts: docs.length,
-                team: docs
+                teams: docs
             };
             res.status(200).json(response);
         })
         .catch(err => {
+            console.log(err);
             res.status(500).json({error: err})
         })
 };
 
 exports.team_get_one = (req, res, next) => {
     Team.findOne({_id: req.params.teamId})
-        .populate('players')
+        .populate('players', '_id nickname')
         .exec()
         .then(doc => {
             const response = {
