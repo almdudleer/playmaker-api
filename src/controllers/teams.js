@@ -1,4 +1,5 @@
 const Team = require('../models/team');
+const User = require('../models/user');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
@@ -32,7 +33,7 @@ exports.team_get_all = (req, res, next) => {
             const response = {
                 status: "ok",
                 counts: docs.length,
-                tournaments: docs
+                team: docs
             };
             res.status(200).json(response);
         })
@@ -42,12 +43,13 @@ exports.team_get_all = (req, res, next) => {
 };
 
 exports.team_get_one = (req, res, next) => {
-    Tournament.findOne({_id: req.params.tournamentId})
+    Team.findOne({_id: req.params.teamId})
+        .populate('players')
         .exec()
         .then(doc => {
             const response = {
                 status: "ok",
-                tournament: doc
+                team: doc
             };
             res.status(200).json(response);
         })
@@ -56,5 +58,84 @@ exports.team_get_one = (req, res, next) => {
         })
 };
 
+exports.team_delete_one = (req, res, next) => {
+    Team.deleteOne({_id: req.body.teamId})
+        .exec()
+        .then(doc => {
+            const response = {
+                status: "ok",
+                message: "deleted"
+            };
+            res.status(200).json(response);
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
+};
+
+exports.team_add_player = (req, res, next) => {
+    let session = null;
+    let response = null;
+    mongoose.startSession()
+        .then(_session => {
+            session = _session;
+            session.startTransaction();
+            return User.findById(req.body.userId);
+        })
+        .then(user => {
+            if (!user) {
+                throw new Error("user not found");
+            }
+            return Team.findOneAndUpdate(
+                {_id: req.params.teamId},
+                {$addToSet: {players: {_id: user._id}}}, //Если игрок уже есть в команде, ничего не изменится
+                {new: true}
+            ).session(session);
+        })
+        .then(team => {
+            response = {
+                status: "ok",
+                updatedTeam: team
+            };
+            return User.findById(req.body.userId);
+        })
+        .then(user => {
+            if (user) {
+                return session.commitTransaction();
+            } else {
+                throw new Error('user was deleted');
+            }
+        })
+        .then(_ => {
+            session.endSession();
+            return res.status(200).json(response);
+        })
+        .catch(err => {
+            session.abortTransaction();
+            session.endSession();
+            res.status(500).json({error: err})
+        });
+
+};
+
+exports.team_delete_player = (req, res, next) => {
+    Team.findOneAndUpdate(
+        {_id: req.params.teamId},
+        {$pull: {players: {_id: req.body.userId}}}, //Удаляем пользователя из команды
+        {new: true}
+    )
+        .exec()
+        .then(team => {
+            const response = {
+                status: "ok",
+                removedPlayer: user,
+                updatedTeam: team
+            };
+            res.status(200).json(response);
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
+};
 
 

@@ -14,14 +14,12 @@ exports.match_post_one = (req, res, next) => {
         }
     })
         .then(resp => {
-            console.log(resp.data);
             resp.data.result._id = resp.data.result.match_id;
             const match = new Match(resp.data.result);
             match.save().then(result => {
                 res.status(201).json({
                     status: "ok",
-                    message: "post /matches",
-                    addedMatch: match
+                    message: "post /matches"
                 });
             }).catch(error => {
                 console.log(error);
@@ -42,7 +40,7 @@ exports.match_post_one = (req, res, next) => {
 
 exports.match_get_all = (req, res, next) => {
     Match.find()
-        .select('match_id start_time lobby_time players')
+        .select('match_id start_time lobby_time players.player_slot players.account_id players.hero_id')
         .exec()
         .then(docs => {
             const response = {
@@ -56,14 +54,29 @@ exports.match_get_all = (req, res, next) => {
             res.status(500).json({error: err})
         })
 };
+
 exports.match_get_one = (req, res, next) => {
-    Match.findOne({match_id: req.params.matchId})
-        .select('match_id start_time lobby_time players')
+    Match.findOne({_id: req.params.matchId})
         .exec()
         .then(doc => {
             const response = {
                 status: "ok",
                 match: doc
+            };
+            res.status(200).json(response);
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
+};
+
+exports.match_delete_one = (req, res, next) => {
+    Match.deleteOne({_id: req.body.matchId})
+        .exec()
+        .then(_ => {
+            const response = {
+                status: "ok",
+                message: "deleted"
             };
             res.status(200).json(response);
         })
