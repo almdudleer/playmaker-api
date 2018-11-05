@@ -4,8 +4,10 @@ info:
   title: "Playmaker API"
 
 servers:
-- url: http://localhost:3000
+- url: http://localhost:3000/api
   description: 'Локальный сервер'
+- url: http://playmaker.gq/api
+  description: 'Перспектива '
 
 paths:
   /teams:
@@ -295,7 +297,7 @@ paths:
     patch:
       tags:
       - TOURNAMENTS
-      summary: "GET /tournaments/{tournamentId}"
+      summary: "PATCH /tournaments/{tournamentId}"
       description: "Update tournament info"
       parameters:
       - in: path
@@ -324,6 +326,159 @@ paths:
                     $ref: "#/components/schemas/Tournament"
         500:
           $ref: "#/components/responses/Error"
+  /tournaments/{tournamentId}/teams:
+    post:
+      tags:
+      - TOURNAMENTS
+      summary: "POST /tournaments/{tournamentId}/teams"
+      parameters:
+      - in: path
+        name: tournamentId
+        required: true
+        schema:
+          type: ObjectId
+      description: "Add team to tournament"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                teamId:
+                  type: ObjectId
+                  required: true
+                  example: "507f1f77bcf86cd799439011"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  updatedTournament:
+                    type: object
+                    $ref: "#/components/schemas/Tournament"
+        500:
+          $ref: "#/components/responses/Error"
+    delete:
+      tags:
+      - TOURNAMENTS
+      summary: "DELETE /tournaments/{tournamentId}/teams"
+      parameters:
+      - in: path
+        name: tournamentId
+        required: true
+        schema:
+          type: ObjectId
+      description: "Delete team from tournament"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                teamId:
+                  type: ObjectId
+                  required: true
+                  example: "507f1f77bcf86cd799439011"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  removedPlayer:
+                    type: ObjectId
+                    example: "507f1f77bcf86cd799439011"
+                  updatedTeam:
+                    type: object
+                    $ref: "#/components/schemas/Tournament"
+        500:
+          $ref: "#/components/responses/Error"
+  /tournaments/{tournamentId}/start:
+    post:
+      tags:
+      - TOURNAMENTS
+      summary: "POST /tournaments/{tournamentId}/start"
+      parameters:
+      - in: path
+        name: tournamentId
+        required: true
+        schema:
+          type: ObjectId
+      description: "Start tournament"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  updatedTournament:
+                    type: object
+                    $ref: "#/components/schemas/Tournament"
+        500:
+          $ref: "#/components/responses/Error"
+  /matches:
+    get:
+      tags:
+      - MATCHES
+      summary: "GET /matches"
+      description: "Get team list"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  count:
+                    type: integer
+                    example: 1
+                  teams:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Team"
+                    minItems: 1
+        500:
+          $ref: "#/components/responses/Error"
+      post:
+        tags:
+        - TEAMS
+        summary: "POST /teams"
+        description: "Add new team"
+        requestBody:
+          content:
+            application/json:
+              schema:
+                properties:
+                  name:
+                    type: String
+                    required: true
+                    example: "Natus Vincere"
+        responses:
+          200:
+            content:
+              application/json:
+                schema:
+                  properties:
+                    status:
+                      type: String
+                      example: ok
+                    addedTeam:
+                      type: object
+                      $ref: "#/components/schemas/Team"
+          500:
+            $ref: "#/components/responses/Error"
+
+
 
 components:
   responses:
@@ -445,3 +600,30 @@ components:
         winnerTeam:
           type: ObjectId
           example: null
+    MatchMin:
+      type: object
+      properties:
+        _id:
+          type: ObjectId
+          example: "507f1f77bcf86cd799439017"
+        players:
+          type: array
+          items:
+            type: object
+            properties:
+              account_id:
+                type: integer
+                example: 4294967295
+              player_slot:
+                type: integer
+                example: 0
+              hero_id:
+                type: integer
+                example: 81
+        start_time:
+          type: integer
+          example: 1538333967
+          description: "Unix timestamp"
+    Match:
+
+

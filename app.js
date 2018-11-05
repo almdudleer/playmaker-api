@@ -7,6 +7,7 @@ const matchesRouter = require('./src/routes/matches');
 const tournamentsRouter = require('./src/routes/tournaments');
 const teamRouter = require('./src/routes/teams');
 const userRouter = require('./src/routes/users');
+const rolesRouter = require('./src/routes/roles');
 require('dotenv').config();
 
 
@@ -38,6 +39,7 @@ app.use('/api/matches', matchesRouter);
 app.use('/api/tournaments', tournamentsRouter);
 app.use('/api/teams', teamRouter);
 app.use('/api/user', userRouter);
+app.use('/api/roles', rolesRouter);
 //test helper
 app.use('/test', require("./src/routes/test"));
 
