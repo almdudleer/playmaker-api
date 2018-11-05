@@ -449,34 +449,53 @@ paths:
                     minItems: 1
         500:
           $ref: "#/components/responses/Error"
-      post:
-        tags:
-        - TEAMS
-        summary: "POST /teams"
-        description: "Add new team"
-        requestBody:
+    post:
+      tags:
+      - MATCHES
+      summary: "POST /matches"
+      description: "Add new match"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                matchId:
+                  type: integer
+                  required: true
+                  example: 156594851
+      responses:
+        200:
           content:
             application/json:
               schema:
                 properties:
-                  name:
+                  status:
                     type: String
-                    required: true
-                    example: "Natus Vincere"
-        responses:
-          200:
-            content:
-              application/json:
-                schema:
-                  properties:
-                    status:
-                      type: String
-                      example: ok
-                    addedTeam:
-                      type: object
-                      $ref: "#/components/schemas/Team"
-          500:
-            $ref: "#/components/responses/Error"
+                    example: ok
+                  addedTeam:
+                    type: object
+                    $ref: "#/components/schemas/Match"
+        500:
+          $ref: "#/components/responses/Error"
+  /matches/{matchId}:
+    get:
+      tags:
+      - MATCHES
+      summary: "GET /matches/{matchId}"
+      description: "Get match info"
+      parameters:
+      - in: path
+        name: matchId
+        required: true
+        schema:
+          type: integer
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Match"
+
 
 
 
@@ -604,8 +623,8 @@ components:
       type: object
       properties:
         _id:
-          type: ObjectId
-          example: "507f1f77bcf86cd799439017"
+          type: integer
+          example: 156948485
         players:
           type: array
           items:
@@ -625,5 +644,131 @@ components:
           example: 1538333967
           description: "Unix timestamp"
     Match:
-
-
+      type: object
+      properties:
+        _id:
+          type: integer
+          example: 151659555
+        duration:
+          type: integer
+          example: 3000
+        start_time:
+          type: integer
+          example: 15695948
+          description: "Unix timestamp"
+        tower_status_radiant:
+          type: integer
+          example: 0
+          description: "https://wiki.teamfortress.com/wiki/WebAPI/GetMatchDetails#Tower_Status"
+        tower_status_dire:
+          type: integer
+          example: 0
+          description: "https://wiki.teamfortress.com/wiki/WebAPI/GetMatchDetails#Tower_Status"
+        barracks_status_radiant:
+          type: integer
+          example: 0
+          description: "See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchDetails#Barracks_Status"
+        barracks_status_dire:
+          type: integer
+          example: 0
+          description: "See https://wiki.teamfortress.com/wiki/WebAPI/GetMatchDetails#Barracks_Status"
+        radiant_score:
+          type: integer
+          example: 30
+        dire_score:
+          type: integer
+          example: 27
+        players:
+          type: array
+          items:
+            type: object
+            properties:
+              account_id:
+                type: integer
+                example: 454545
+              player_slot:
+                type: integer
+                example: 0
+              hero_id:
+                type: integer
+                example: 78
+              item_0:
+                type: integer
+                example: 7
+              item_1:
+                type: integer
+                example: 7
+              item_2:
+                type: integer
+                example: 7
+              item_3:
+                type: integer
+                example: 7
+              item_4:
+                type: integer
+                example: 7
+              item_5:
+                type: integer
+                example: 7
+              backpack_0:
+                type: integer
+                example: 7
+              backpack_1:
+                type: integer
+                example: 7
+              backpack_2:
+                type: integer
+                example: 7
+              kills:
+                type: integer
+                example: 11
+              deaths:
+                type: integer
+                example: 5
+              assists:
+                type: integer
+                example: 7
+              last_hits:
+                type: integer
+                example: 257
+              denies:
+                type: integer
+                example: 7
+              gold_per_min:
+                type: integer
+                example: 478
+              xp_per_min:
+                type: integer
+                example: 785
+              level:
+                type: integer
+                example: 25
+              hero_damage:
+                type: integer
+                example: 12659
+              tower_damage:
+                type: integer
+                example: 13485
+              hero_healing:
+                type: integer
+                example: 0
+              gold:
+                type: integer
+                example: 19845
+              gold_spent:
+                type: integer
+                example: 17856
+              abitily_upgrades:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    ability:
+                      type: integer
+                      example: 15
+                    time:
+                      type: integer
+                      example: 0
+                    level:
+                      type: integer
+                      example: 1

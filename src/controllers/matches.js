@@ -9,7 +9,7 @@ exports.match_post_one = (req, res, next) => {
     //fetching data from Steam API
     axios.get(steamApi.getMatchDetails, {
         params: {
-            match_id: req.body.match_id,
+            match_id: req.body.matchId,
             key: process.env.STEAM_API_KEY
         }
     })
@@ -19,7 +19,8 @@ exports.match_post_one = (req, res, next) => {
             match.save().then(result => {
                 res.status(200).json({
                     status: "ok",
-                    message: "post /matches"
+                    message: "post /matches",
+                    addedMatch: match
                 });
             }).catch(error => {
                 console.log(error);
