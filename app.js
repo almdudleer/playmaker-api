@@ -34,10 +34,10 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use('/matches', matchesRouter);
-app.use('/tournaments', tournamentsRouter);
-app.use('/teams', teamRouter);
-app.use('/user', userRouter);
+app.use('/api/matches', matchesRouter);
+app.use('/api/tournaments', tournamentsRouter);
+app.use('/api/teams', teamRouter);
+app.use('/api/user', userRouter);
 //test helper
 app.use('/test', require("./src/routes/test"));
 
