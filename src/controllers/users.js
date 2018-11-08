@@ -2,50 +2,57 @@ const User = require('../models/user');
 const Match = require('../models/match');
 const Tournament = require('../models/tournament');
 const mongoose = require('mongoose');
+const passport = require('passport');
 require('dotenv').config();
 
 exports.user_signup = (req, res, next) => {
-    const user = new User({
+    User.register(new User({
         _id: new mongoose.Types.ObjectId,
-        nickname: req.body.nickname,
         email: req.body.email,
-        password: req.body.password,
-        account_id: req.body.account_id
+        username: req.body.username
+    }), req.body.password, function (err, user) {
+        console.log(user);
+        if (err) {
+            console.log(err);
+            res.status(409).json({
+                name: err.name,
+                message: err.message
+            })
+        } else {
+            res.status(200).json({
+                message: "User created"
+            })
+        }
     });
-    user.save()
-        .then(result => {
-            console.log(result);
-            res.status(201).json({
-                status: "ok",
-                message: "user registered",
-                addedUser: user
-            });
-        }).catch(error => {
-        console.log(error);
-        res.status(500).json({
-            status: "error",
-            error: error
-        });
-    })
 };
 
 exports.user_update = (req, res, next) => {
     User.findOneAndUpdate(
-        {_id: req.body.id}, // почему не userId?
+        {_id: req.user._id}, // почему не userId?
         {
             $set: {
                 email: req.body.email,
-                password: req.body.password,
-                account_id: req.body.account_id
+                accountId: req.body.accountId
             }
-        }
+        },
+        {new: true}
     )
+        .exec()
+        .then(user => {
+            res.status(200).json({
+                message: "updated",
+                user: user
+            })
+        })
+        .catch(err => {
+            res.status(500).json({error: err})
+        })
 };
 
 exports.user_get_info = (req, res, next) => {
     User.findOne({_id: req.params.id})
         .populate('selected_matches', 'selected_tournaments')
-        .select('_id nickname account_id selected_matches selected_tournaments')
+        .select('_id account_id selected_matches selected_tournaments')
         .exec()
         .then(doc => {
             const response = {
@@ -202,18 +209,9 @@ exports.user_restore_password = (req, res, next) => {
         })
 };
 
-//basic auth
-exports.user_auth = (req, res, next) => {
-    User.findOne({email: req.body.userEmail, password: req.query.userPassword})
-        .exec()
-        .then(doc => {
-            //TODO: encrypt password
-            const response = {
-                status: doc ? "ok" : "fail"
-            };
-            res.status(200).json(response);
-        })
-        .catch(err => {
-            res.status(500).json({error: err})
-        })
+exports.user_logout = (req, res, next) => {
+    req.logout();
+    res.status(200).json({
+        message: "logged out"
+    })
 };

@@ -8,6 +8,12 @@ const tournamentsRouter = require('./src/routes/tournaments');
 const teamRouter = require('./src/routes/teams');
 const userRouter = require('./src/routes/users');
 const rolesRouter = require('./src/routes/roles');
+const session = require('express-session');
+const passport = require('passport'), LocalStrategy = require('passport-local').Strategy;
+const passportLocalMongoose = require('passport-local-mongoose');
+const User = require('./src/models/user');
+const MongoStore = require('connect-mongo')(session);
+
 require('dotenv').config();
 
 
@@ -17,6 +23,25 @@ mongoose.connect(process.env.DB_CONNECTION_STRING, {
 });
 mongoose.set('useFindAndModify', false);
 
+//Auth
+app.use(session({
+    store: new MongoStore({
+        mongooseConnection: mongoose.connection
+    }),
+    secret: "Tsopa",
+    resave: false,
+    saveUninitialized: false
+}));
+app.use(express.urlencoded({ extended: true })); // express body-parser
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+passport.use(User.createStrategy());
+
+// use static serialize and deserialize of model for passport session support
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser())
 //HTTP request logger
 app.use(morgan('dev'));
 

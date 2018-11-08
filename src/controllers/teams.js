@@ -28,7 +28,7 @@ exports.team_post_one = (req, res, next) => {
 
 exports.team_get_all = (req, res, next) => {
     Team.find()
-        .populate('players', '_id nickname')
+        .populate('players', '_id username')
         .exec()
         .then(docs => {
             const response = {
@@ -46,7 +46,7 @@ exports.team_get_all = (req, res, next) => {
 
 exports.team_get_one = (req, res, next) => {
     Team.findOne({_id: req.params.teamId})
-        .populate('players', '_id nickname')
+        .populate('players', '_id username')
         .exec()
         .then(doc => {
             const response = {
