@@ -535,7 +535,7 @@ components:
         _id:
           type: ObjectId
           example: "507f1f77bcf86cd799439011"
-        nickname:
+        username:
           type: string
           example: "Bleizard"
     Tournament:
