@@ -31,7 +31,7 @@ exports.tournament_post_one = (req, res, next) => {
 
 exports.tournament_get_all = (req, res, next) => {
     Tournament.find()
-        .select('name teamCount prizePool teams bracket')
+        .select('name teamCount prizePool teams bracket owner')
         .exec()
         .then(docs => {
             const response = {
@@ -49,7 +49,7 @@ exports.tournament_get_all = (req, res, next) => {
 exports.tournament_get_one = (req, res, next) => {
     Tournament.findOne({_id: req.params.tournamentId})
         .populate('teams')
-        .select('name teamCount prizePool teams bracket')
+        .select('name teamCount prizePool teams bracket owner')
         .exec()
         .then(doc => {
             const response = {
