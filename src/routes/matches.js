@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const MatchesController = require('../controllers/matches');
+const Auth = require('../controllers/auth');
 
-router.post('/', MatchesController.match_post_one);
+router.post('/', Auth.isLoggedIn, MatchesController.match_post_one);
 
 router.get('/', MatchesController.match_get_all);
 
