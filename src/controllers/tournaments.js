@@ -5,7 +5,7 @@ require('dotenv').config();
 
 exports.tournament_post_one = (req, res, next) => {
     const tournament = new Tournament({
-        owner: req.body.owner,
+        owner: req.user._id,
         _id: new mongoose.Types.ObjectId,
         name: req.body.name,
         teamCount: req.body.teamCount,
@@ -31,7 +31,7 @@ exports.tournament_post_one = (req, res, next) => {
 
 exports.tournament_get_all = (req, res, next) => {
     Tournament.find()
-        .select('name teamCount prizePool teams bracket owner')
+        .select('name teamCount prizePool teams bracket owner description')
         .exec()
         .then(docs => {
             const response = {
@@ -49,7 +49,7 @@ exports.tournament_get_all = (req, res, next) => {
 exports.tournament_get_one = (req, res, next) => {
     Tournament.findOne({_id: req.params.tournamentId})
         .populate('teams')
-        .select('name teamCount prizePool teams bracket owner')
+        .select('name teamCount prizePool teams bracket owner description')
         .exec()
         .then(doc => {
             const response = {
@@ -64,14 +64,22 @@ exports.tournament_get_one = (req, res, next) => {
 };
 
 exports.tournament_delete_one = (req, res, next) => {
-    Tournament.deleteOne({_id: req.body.tournamentId})
+    Tournament.findOneAndDelete({_id: req.body.tournamentId, owner: req.user._id})
         .exec()
-        .then(_ => {
-            const response = {
-                status: "ok",
-                message: "deleted"
-            };
-            res.status(200).json(response);
+        .then(result => {
+            if (result) {
+                const response = {
+                    status: "ok",
+                    message: "deleted"
+                };
+                res.status(200).json(response);
+            } else {
+                const response = {
+                    status: "ok",
+                    message: "not owner or tournament doesn't exist"
+                };
+                res.status(200).json(response);
+            }
         })
         .catch(err => {
             res.status(500).json({error: err})
@@ -89,7 +97,7 @@ exports.tournament_add_team = (req, res, next) => {
         })
         .then(team => {
             if (!team) {
-               throw new Error("team not found");
+                throw "team not found";
             }
             return Tournament.findOneAndUpdate(
                 {_id: req.params.tournamentId},
@@ -108,7 +116,7 @@ exports.tournament_add_team = (req, res, next) => {
             if (team) {
                 return session.commitTransaction();
             } else {
-                throw new Error('team was deleted');
+                throw "team was deleted";
             }
         })
         .then(_ => {
@@ -144,7 +152,7 @@ exports.tournament_delete_team = (req, res, next) => {
 
 exports.tournament_update = (req, res, next) => {
     Tournament.findOneAndUpdate(
-        {_id: req.params.tournamentId},
+        {_id: req.params.tournamentId, owner: req.user.body},
         {
             $set: {
                 description: req.body.description
@@ -166,27 +174,26 @@ exports.tournament_update = (req, res, next) => {
 };
 
 exports.tournament_start = (req, res, next) => {
-    Tournament.findOne({_id: req.params.tournamentId})
+    Tournament.findOne({_id: req.params.tournamentId, owner: req.user._id})
         .exec()
         .then(tournament => {
-            console.log("1");
-            if (tournament.started) return res.status(200).json({message: "Tournament already started "});
-            tournament.generateBracket();
-            tournament.started = true;
-            tournament.save()
-                .then(tournament => {
-                    const response = {
-                        status: "ok",
-                        updatedTournament: tournament
-                    };
-                    res.status(200).json(response);
-                })
-                .catch(err => {
-                    res.status(500).json({error: err})
-                });
-
+            if (tournament) {
+                if (tournament.started) return res.status(200).json({message: "Tournament already started "});
+                tournament.generateBracket();
+                tournament.started = true;
+                return tournament.save()
+            }
+            throw "Not owner"
+        })
+        .then(tournament => {
+            const response = {
+                status: "ok",
+                updatedTournament: tournament
+            };
+            res.status(200).json(response);
         })
         .catch(err => {
+            console.log(err);
             res.status(500).json({error: err})
         })
 };

@@ -86,7 +86,7 @@ exports.team_add_player = (req, res, next) => {
         })
         .then(user => {
             if (!user) {
-                throw new Error("user not found");
+                throw "user not found";
             }
             return Team.findOneAndUpdate(
                 {_id: req.params.teamId},
@@ -105,7 +105,7 @@ exports.team_add_player = (req, res, next) => {
             if (user) {
                 return session.commitTransaction();
             } else {
-                throw new Error('user was deleted');
+                throw "user was deleted";
             }
         })
         .then(_ => {

@@ -5,7 +5,7 @@ const tournamentSchema = mongoose.Schema({
     owner: {type: mongoose.Schema.Types.ObjectId, required: true},
     description: String,
     name: {type: String, required: true, unique: true},
-    teamCount: {type: Number, required: true},
+    teamCount: {type: Number},
     prizePool: Number,
     finished: {type: Boolean, default: false},
     started: {type: Boolean, default: false},
