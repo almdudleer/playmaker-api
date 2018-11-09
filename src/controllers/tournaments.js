@@ -183,7 +183,10 @@ exports.tournament_start = (req, res, next) => {
                 tournament.started = true;
                 return tournament.save()
             }
-            throw "Not owner"
+            throw {
+                message: "Not owner",
+                code: 403
+            };
         })
         .then(tournament => {
             const response = {
@@ -194,6 +197,6 @@ exports.tournament_start = (req, res, next) => {
         })
         .catch(err => {
             console.log(err);
-            res.status(500).json({error: err})
+            res.status(err.code || 500).json({error: err.message})
         })
 };

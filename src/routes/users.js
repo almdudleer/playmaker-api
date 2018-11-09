@@ -17,5 +17,7 @@ router.post('/logout', Auth.isLoggedIn, UserController.user_logout);
 
 router.patch('/', Auth.isLoggedIn, UserController.user_update);
 
+router.get('/roles', UserController.user_get_roles);
+
 
 module.exports = router;

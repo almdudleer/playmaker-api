@@ -215,3 +215,17 @@ exports.user_logout = (req, res, next) => {
         message: "logged out"
     })
 };
+
+exports.user_get_roles = (req, res, next) => {
+    if (req.user) {
+        res.status(200).json({
+            status: "ok",
+            authGroup: req.user.roles
+        });
+    } else {
+        res.status(200).json({
+            status: "ok",
+            authGroup: ["VISITOR"]
+        });
+    }
+};
