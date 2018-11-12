@@ -13,6 +13,7 @@ const passport = require('passport'), LocalStrategy = require('passport-local').
 const passportLocalMongoose = require('passport-local-mongoose');
 const User = require('./src/models/user');
 const MongoStore = require('connect-mongo')(session);
+const cors = require('cors');
 
 require('dotenv').config();
 
@@ -50,15 +51,27 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 //Cross-origin resource sharing
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', '*');
-    if (req.method === 'OPTIONS') {
-        res.header('Access-Control-Allow-Methods', '*');
-        return res.status(200).json({});
-    }
-    next();
-});
+const originsWhitelist = [
+    'http://localhost:4200',      //this is my front-end url for development
+];
+const corsOptions = {
+    origin: function (origin, callback) {
+        const isWhitelisted = originsWhitelist.indexOf(origin) !== -1;
+        callback(null, isWhitelisted);
+    },
+    credentials: true
+};
+app.use(cors(corsOptions));
+// app.use((req, res, next) => {
+//     res.header('Access-Control-Allow-Origin', 'http://localhost:4200');
+//     res.header('Access-Control-Allow-Headers', 'If-Modified-Since, Content-Type');
+//     res.header('Access-Control-Allow-Credentials', 'true');
+//     if (req.method === 'OPTIONS') {
+//         res.header('Access-Control-Allow-Methods', '*');
+//         return res.status(200).json({});
+//     }
+//     next();
+// });
 
 app.use('/api/matches', matchesRouter);
 app.use('/api/tournaments', tournamentsRouter);
