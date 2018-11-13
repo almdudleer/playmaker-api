@@ -9,6 +9,7 @@ exports.user_signup = (req, res, next) => {
     User.register(new User({
         _id: new mongoose.Types.ObjectId,
         email: req.body.email,
+        roles: ['USER'],
         username: req.body.username
     }), req.body.password, function (err, user) {
         console.log(user);
