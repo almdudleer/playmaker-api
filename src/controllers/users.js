@@ -27,6 +27,28 @@ exports.user_signup = (req, res, next) => {
     });
 };
 
+exports.user_email_exists = async (req, res, next) => {
+    const user = await User.findOne(
+        {
+            email: req.query.email
+        }
+    ).exec();
+    res.status(200).json({
+        exists: !!user
+    })
+};
+
+exports.user_username_exists = async (req, res, next) => {
+    const user = await User.findOne(
+        {
+            username: req.query.username
+        }
+    ).exec();
+    res.status(200).json({
+        exists: !!user
+    })
+};
+
 exports.user_update = (req, res, next) => {
     User.findOneAndUpdate(
         {_id: req.user._id}, // почему не userId?

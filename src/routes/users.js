@@ -19,5 +19,8 @@ router.patch('/', Auth.isLoggedIn, UserController.user_update);
 
 router.get('/roles', UserController.user_get_roles);
 
+router.get('/eexists', UserController.user_email_exists);
+
+router.get('/uexists', UserController.user_username_exists);
 
 module.exports = router;
