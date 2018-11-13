@@ -79,9 +79,9 @@ exports.tournament_delete_one = async (req, res, next) => {
 };
 
 exports.tournament_add_team = async (req, res, next) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
-        session = await mongoose.startSession();
-        session.startTransaction();
         let team = await Team.findById(req.body.teamId);
 
         if (!team) {
@@ -106,7 +106,7 @@ exports.tournament_add_team = async (req, res, next) => {
             res.status(500).json({error: "team was deleted"})
         }
     } catch (err) {
-        session.abortTransaction();
+        await session.abortTransaction();
         session.endSession();
         res.status(500).json({error: err})
     }

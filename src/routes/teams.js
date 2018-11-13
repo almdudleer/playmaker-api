@@ -11,8 +11,10 @@ router.get('/:teamId', TeamsController.team_get_one);
 
 router.delete('/', Auth.isLoggedIn, TeamsController.team_delete_one);
 
-router.post('/:teamId/players', Auth.isLoggedIn, TeamsController.team_add_player);
+router.post('/:teamId/players', Auth.isLoggedIn, TeamsController.team_invite_player);
 
 router.delete('/:teamId/players', Auth.isLoggedIn, TeamsController.team_delete_player);
+
+router.post('/:teamId/join', Auth.isLoggedIn, TeamsController.team_join);
 
 module.exports = router;

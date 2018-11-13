@@ -4,9 +4,9 @@ const mongoose = require('mongoose');
 require('dotenv').config();
 
 exports.team_post_one = async (req, res, next) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
-        const session = await mongoose.startSession();
-        session.startTransaction();
         await User.findOneAndUpdate(
             {_id: req.user._id},
             {$addToSet: {roles: "CAPTAIN"}},
@@ -15,18 +15,19 @@ exports.team_post_one = async (req, res, next) => {
         const team = new Team({
             _id: new mongoose.Types.ObjectId,
             name: req.body.name,
-            captain: req.user._id
+            captain: req.user._id,
+            players: req.user._id
         });
         await team.save();
         await session.commitTransaction();
         session.endSession();
-        await res.status(200).json({
+        res.status(200).json({
             status: "ok",
             message: "post /teams",
             addedTeam: team
         });
     } catch (error) {
-        session.abortTransaction();
+        await session.abortTransaction();
         session.endSession();
         console.log(error);
         res.status(500).json({
@@ -67,7 +68,7 @@ exports.team_get_one = async (req, res, next) => {
 
 exports.team_delete_one = async (req, res, next) => {
     try {
-        const team = await Team.findOneAndDelete({_id: req.body.teamId, owner: req.user._id}).exec()
+        const team = await Team.findOneAndDelete({_id: req.body.teamId, owner: req.user._id}).exec();
         if (team) {
             const response = {
                 status: "ok",
@@ -85,40 +86,75 @@ exports.team_delete_one = async (req, res, next) => {
 
 };
 
-exports.team_add_player = async (req, res, next) => {
+exports.team_invite_player = async (req, res, next) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
-        const session = await mongoose.startSession();
-        session.startTransaction();
-        let user = await User.findById(req.body.userId);
+        const team = await Team.findById(req.params.teamId).session(session);
+        if (!team.captain.equals(req.user._id)) {
+            res.status(403).json({
+                error: "not owner"
+            });
+            await session.abortTransaction();
+            session.endSession();
+            return;
+        }
+        const user = await User.findOneAndUpdate(
+            {username: req.body.username},
+            {$addToSet: {invites: {_id: req.params.teamId}}}
+        ).session(session);
         if (!user) {
-            return res.status(500).json({
+            res.status(404).json({
                 error: "user not found"
-            })
+            });
+            await session.abortTransaction();
+            session.endSession();
+            return;
+        }
+        res.status(200).json({
+            successful: true
+        });
+        await session.commitTransaction();
+        session.endSession();
+    } catch (err) {
+        await session.abortTransaction();
+        session.endSession();
+        res.status(500).json({error: err});
+    }
+};
+
+exports.team_join = async (req, res, next) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        const user = await User.findOneAndUpdate(
+            {_id: req.user._id, invites: req.params.teamId},
+            {$pull: {invites: req.params.teamId}}
+        ).session(session);
+        console.log(user);
+        if (!user) {
+            res.status(403).json({
+                successful: false,
+                message: "You haven't been invited to this team"
+            });
+            await session.abortTransaction();
+            session.endSession();
+            return;
         }
         const team = await Team.findOneAndUpdate(
             {_id: req.params.teamId},
-            {$addToSet: {players: {_id: user._id}}}, //Если игрок уже есть в команде, ничего не изменится
-            {new: true}
+            {$addToSet: {players: {_id: req.user._id}}}
         ).session(session);
-        response = {
-            status: "ok",
-            updatedTeam: team
-        };
-        user = await User.findById(req.body.userId);
 
-        if (user) {
-            await session.commitTransaction();
-            session.endSession();
-            return res.status(200).json(response);
-        } else {
-            return res.status(500).json({
-                error: "user was deleted"
-            })
-        }
-    } catch (err) {
-        session.abortTransaction();
+        res.status(200).json({
+            successful: true
+        });
+        await session.commitTransaction();
         session.endSession();
-        res.status(500).json({error: err})
+    } catch (err) {
+        await session.abortTransaction();
+        session.endSession();
+        res.status(500).json({error: err});
     }
 };
 
@@ -139,5 +175,3 @@ exports.team_delete_player = (req, res, next) => {
         res.status(500).json({error: err})
     }
 };
-
-
