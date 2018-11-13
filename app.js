@@ -11,8 +11,8 @@ const session = require('express-session');
 const passport = require('passport'), LocalStrategy = require('passport-local').Strategy;
 const passportLocalMongoose = require('passport-local-mongoose');
 const User = require('./src/models/user');
-const cors = require('cors');
 const MongoStore = require('connect-mongo')(session);
+const cors = require('cors');
 
 require('dotenv').config();
 
