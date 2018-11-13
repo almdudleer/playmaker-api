@@ -11,6 +11,7 @@ const session = require('express-session');
 const passport = require('passport'), LocalStrategy = require('passport-local').Strategy;
 const passportLocalMongoose = require('passport-local-mongoose');
 const User = require('./src/models/user');
+const cors = require('cors');
 const MongoStore = require('connect-mongo')(session);
 
 require('dotenv').config();
@@ -49,15 +50,19 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 
 //Cross-origin resource sharing
-app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', '*');
-    if (req.method === 'OPTIONS') {
-        res.header('Access-Control-Allow-Methods', '*');
-        return res.status(200).json({});
-    }
-    next();
-});
+const originsWhitelist = [
+    'http://localhost:4200'
+];
+
+const corsOptions = {
+    origin: function(origin, callback){
+        const isWhitelisted = originsWhitelist.indexOf(origin) !== -1;
+        callback(null, isWhitelisted);
+    },
+    credentials:true
+};
+
+app.use(cors(corsOptions));
 
 app.use('/api/matches', matchesRouter);
 app.use('/api/tournaments', tournamentsRouter);
