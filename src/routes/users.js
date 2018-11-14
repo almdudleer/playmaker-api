@@ -9,7 +9,8 @@ router.post('/signup', UserController.user_signup);
 router.post('/login', passport.authenticate('local'), (req, res, next) => {
     console.log("successful");
     res.status(200).json({
-        message:"successful"
+        success: true,
+        username: req.body.username
     })
 });
 
@@ -22,5 +23,7 @@ router.get('/roles', UserController.user_get_roles);
 router.get('/eexists', UserController.user_email_exists);
 
 router.get('/uexists', UserController.user_username_exists);
+
+router.get('/:username', UserController.user_get_info);
 
 module.exports = router;

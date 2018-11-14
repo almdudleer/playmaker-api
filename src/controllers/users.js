@@ -73,7 +73,7 @@ exports.user_update = (req, res, next) => {
 };
 
 exports.user_get_info = (req, res, next) => {
-    User.findOne({_id: req.params.id})
+    User.findOne({username: req.params.username})
         .populate('selected_matches', 'selected_tournaments')
         .select('_id account_id selected_matches selected_tournaments')
         .exec()
@@ -243,7 +243,8 @@ exports.user_get_roles = (req, res, next) => {
     if (req.user) {
         res.status(200).json({
             status: "ok",
-            authGroup: req.user.roles
+            authGroup: req.user.roles,
+            username: req.user.username
         });
     } else {
         res.status(200).json({
