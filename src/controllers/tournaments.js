@@ -78,33 +78,87 @@ exports.tournament_delete_one = async (req, res, next) => {
     }
 };
 
-exports.tournament_add_team = async (req, res, next) => {
+exports.tournament_join = async (req, res, next) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-        let team = await Team.findById(req.body.teamId);
+        const team = await Team.findByIdAndUpdate(req.body.teamId).populate('players');
 
         if (!team) {
-            res.status(500).json({error: "team not fount"})
+            res.status(404).json({error: "team not found"});
+            await session.abortTransaction();
+            session.endSession();
+            return;
         }
-        const doc = await Tournament.findOneAndUpdate(
+
+        if (!team.captain.equals(req.user._id)) {
+            res.status(403).json({
+                successful: false,
+                error: "Not captain"
+            });
+            await session.abortTransaction();
+            session.endSession();
+            return;
+        }
+
+        if (team.players.length < 5) {
+            res.status(200).json({
+                successful: false,
+                error: "Less then 5 players"
+            });
+            await session.abortTransaction();
+            session.endSession();
+            return;
+        }
+
+        const tournaments = await Tournament.findOneAndUpdate(
             {_id: req.params.tournamentId},
-            {$addToSet: {teams: {_id: team._id}}}, //Если команда уже есть, ничего не изменится
-            {new: true}
-        ).session(session);
+            {$addToSet: {teams: {_id: team._id}}}
+        ).populate({
+            path: 'teams'
+        }).session(session);
+
+        if (!tournaments) {
+            res.status(404).json({error: "tournament not fount"});
+            await session.abortTransaction();
+            session.endSession();
+            return;
+        }
+
+        if (tournaments.teams.length >= tournaments.teamCount) {
+            res.status(200).json({
+                successful: false,
+                error: "No slots"
+            });
+            await session.abortTransaction();
+            session.endSession();
+            return;
+        }
+
+        for (let i = 0; i < tournaments.teams.length; i++) {
+            for (let j = 0; j < team.players.length; j++) {
+                if (tournaments.teams[i].players.indexOf(team.players[j]._id) > -1) {
+                    console.log("+++++");
+                    res.status(200).json({
+                        successful: false,
+                        error: team.players[j].username + " is already participating in the tournament."
+                    });
+                    await session.abortTransaction();
+                    session.endSession();
+                    return;
+                }
+            }
+        }
+
+        console.log(tournaments);
         const response = {
             status: "ok",
-            updatedTournament: doc
+            updatedTournament: tournaments
         };
-        team = await Team.findById(req.body.teamId);
 
-        if (team) {
-            await session.commitTransaction();
-            session.endSession();
-            return res.status(200).json(response);
-        } else {
-            res.status(500).json({error: "team was deleted"})
-        }
+        res.status(200).json(response);
+        await session.commitTransaction();
+        session.endSession();
     } catch (err) {
         await session.abortTransaction();
         session.endSession();

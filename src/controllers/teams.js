@@ -93,7 +93,7 @@ exports.team_invite_player = async (req, res, next) => {
         const team = await Team.findById(req.params.teamId).session(session);
         if (!team.captain.equals(req.user._id)) {
             res.status(403).json({
-                error: "not owner"
+                error: "not captain"
             });
             await session.abortTransaction();
             session.endSession();

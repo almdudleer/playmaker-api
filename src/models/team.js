@@ -5,11 +5,11 @@ const teamSchema = mongoose.Schema({
     captain: {type: mongoose.Schema.Types.ObjectId, required: true},
     players: {
         type: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
-        validate: [arrayLimit, '{PATH} exceeds the limit of 10']
+        validate: [playersLimit, '{PATH} exceeds the limit of 10']
     }
 });
 
-function arrayLimit(val) {
+function playersLimit(val) {
     return val.length <= 5;
 }
 

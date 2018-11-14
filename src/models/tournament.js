@@ -5,25 +5,27 @@ const tournamentSchema = mongoose.Schema({
     owner: {type: mongoose.Schema.Types.ObjectId, required: true},
     description: String,
     name: {type: String, required: true, unique: true},
-    teamCount: {type: Number},
+    teamCount: {type: Number, enum: [4, 8, 16, 32, 64]},
     prizePool: Number,
     finished: {type: Boolean, default: false},
     started: {type: Boolean, default: false},
     winnerTeam: {type: mongoose.Schema.Types.ObjectId, default: null},
-    teams: [
-        {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'Team'
-        }
-    ],
+    teams: {
+        type: [{type: mongoose.Schema.Types.ObjectId, ref: 'Team'}],
+        validate: [teamLimit, '{PATH} exceeds the limit of teams']
+    },
     bracket: [{
         _id: Number,
         team1: mongoose.Schema.Types.ObjectId, //команды участницы
         team2: mongoose.Schema.Types.ObjectId,
-        stage: {type: Number, required: true}, //стадия сетки (16 = 1/16, 4=1/4, 1=финал)
+        stage: {type: Number, required: true, enum: [1, 2, 4, 8, 16, 32, 64]}, //стадия сетки (16 = 1/16, 4=1/4, 1=финал)
         parentMatch: {type: Number, required: true}, //_id следующего по сетке матча
     }]
 });
+
+function teamLimit(val) {
+    return val.length <= this.teamCount;
+}
 
 tournamentSchema.methods.generateBracket = function () {
     this.bracket = [];
