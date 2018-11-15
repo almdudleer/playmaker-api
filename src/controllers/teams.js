@@ -67,20 +67,41 @@ exports.team_get_one = async (req, res, next) => {
 };
 
 exports.team_delete_one = async (req, res, next) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
-        const team = await Team.findOneAndDelete({_id: req.body.teamId, owner: req.user._id}).exec();
+        let team = await Team.findOneAndDelete({_id: req.body.teamId}).session(session);
         if (team) {
-            const response = {
-                status: "ok",
-                message: "deleted"
-            };
-            res.status(200).json(response);
+            if (team.captain.equals(req.user._id)) {
+                const response = {
+                    successful: true,
+                    message: "deleted"
+                };
+                team = await Team.findOne({captain: req.user._id}).session(session);
+                console.log(team);
+                if (!team) {
+                    await User.findOneAndUpdate({_id: req.user._id}, {$pull: {roles: "CAPTAIN"}}).session(session);
+                }
+                await session.commitTransaction();
+                session.endSession();
+                res.status(200).json(response);
+            } else {
+                await session.abortTransaction();
+                session.endSession();
+                res.status(403).json({
+                    error: "not captain"
+                });
+            }
         } else {
-            res.status(403).json({
-                error: "not captain or team doesn't exist"
+            await session.abortTransaction();
+            session.endSession();
+            res.status(404).json({
+                error: "team not found"
             });
         }
     } catch (err) {
+        await session.abortTransaction();
+        session.endSession();
         res.status(500).json({error: err.message})
     }
 
