@@ -11,7 +11,7 @@ router.get('/:tournamentId', TournamentsController.tournament_get_one);
 
 router.delete('/', Auth.isLoggedIn, TournamentsController.tournament_delete_one);
 
-router.post('/:tournamentId/teams', Auth.isLoggedIn, TournamentsController.tournament_add_team);
+router.post('/:tournamentId/join', Auth.isLoggedIn, TournamentsController.tournament_join);
 
 router.delete('/:tournamentId/teams', Auth.isLoggedIn, TournamentsController.tournament_delete_team);
 
