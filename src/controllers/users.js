@@ -1,4 +1,5 @@
 const User = require('../models/user');
+const Team = require('../models/team');
 const Match = require('../models/match');
 const Tournament = require('../models/tournament');
 const mongoose = require('mongoose');
@@ -250,5 +251,17 @@ exports.user_get_roles = (req, res, next) => {
             status: "ok",
             authGroup: ["VISITOR"]
         });
+    }
+};
+
+exports.user_get_teams = async (req, res, next) => {
+    try {
+        const teams = await Team.find({captain: req.user._id});
+        res.status(200).json({
+            successful: true,
+            teams: teams
+        })
+    } catch (err) {
+        res.status(500).json({error: err});
     }
 };
