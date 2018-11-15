@@ -179,20 +179,43 @@ exports.team_join = async (req, res, next) => {
     }
 };
 
-exports.team_delete_player = (req, res, next) => {
+exports.team_delete_player = async (req, res, next) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
-        const team = Team.findOneAndUpdate(
+        const team = await Team.findOneAndUpdate(
             {_id: req.params.teamId},
-            {$pull: {players: {_id: req.body.userId}}}, //Удаляем пользователя из команды
+            {$pull: {players: req.body.userId}}, //Удаляем пользователя из команды
             {new: true}
-        ).exec();
+        ).session(session).exec();
+        if (!team) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(404).json({successful: false, error: 'Team not found'});
+        }
+
+        if (req.user._id.equals(req.body.userId) && team.captain.equals(req.user._id)) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(200).json({successful: false, error: "Can't kick yourself, change captain or delete team"});
+        }
+
+        if (!team.captain.equals(req.user._id) && !req.user._id.equals(req.body.userId)) {
+            await session.abortTransaction();
+            session.endSession();
+            return res.status(403).json({successful: false, error: 'Not captain'});
+        }
         const response = {
             status: "ok",
-            removedPlayer: user,
             updatedTeam: team
         };
+        await session.commitTransaction();
+        session.endSession();
         res.status(200).json(response);
     } catch (err) {
-        res.status(500).json({error: err})
+        console.log(err);
+        await session.abortTransaction();
+        session.endSession();
+        res.status(500).json({error: err});
     }
 };

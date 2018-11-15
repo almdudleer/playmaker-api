@@ -32,6 +32,7 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }));
+
 app.use(express.urlencoded({ extended: true })); // express body-parser
 app.use(passport.initialize());
 app.use(passport.session());
@@ -41,7 +42,7 @@ passport.use(User.createStrategy());
 
 // use static serialize and deserialize of model for passport session support
 passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser())
+passport.deserializeUser(User.deserializeUser());
 //HTTP request logger
 app.use(morgan('dev'));
 
