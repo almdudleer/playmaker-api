@@ -56,11 +56,15 @@ exports.team_get_all = async (req, res, next) => {
 exports.team_get_one = async (req, res, next) => {
     try {
         const team = await Team.findOne({_id: req.params.teamId}).populate('players', '_id username').exec();
-        const response = {
-            status: "ok",
-            team: team
-        };
-        await res.status(200).json(response);
+        if (team) {
+            const response = {
+                success: true,
+                team: team
+            };
+            res.status(200).json(response);
+        } else {
+            res.status(404).json({error: "No such team"})
+        }
     } catch (err) {
         res.status(500).json({error: err.message})
     }
