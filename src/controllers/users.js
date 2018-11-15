@@ -72,21 +72,24 @@ exports.user_update = (req, res, next) => {
         })
 };
 
-exports.user_get_info = (req, res, next) => {
-    User.findOne({username: req.params.username})
-        .populate('selected_matches', 'selected_tournaments')
-        .select('_id account_id selected_matches selected_tournaments')
-        .exec()
-        .then(doc => {
+exports.user_get_info = async (req, res, next) => {
+    try {
+        const doc = await User.findOne({username: req.params.username})
+            .populate('selected_matches', 'selected_tournaments')
+            .select('_id account_id selected_matches selected_tournaments')
+            .exec();
+        if (doc) {
             const response = {
-                status: "ok",
+                success: true,
                 user_info: doc
             };
             res.status(200).json(response);
-        })
-        .catch(err => {
-            res.status(500).json({error: err})
-        })
+        } else {
+            res.status(404).json({error: "No such user"})
+        }
+    } catch (err) {
+        res.status(500).json({error: err})
+    }
 };
 
 exports.user_add_match = (req, res, next) => {
@@ -102,7 +105,7 @@ exports.user_add_match = (req, res, next) => {
                     .exec()
                     .then(user => {
                         const response = {
-                            status: "ok",
+                            success: true,
                             addedMatch: match,
                             updatedUser: user
                         };
@@ -144,7 +147,6 @@ exports.user_delete_match = (req, res, next) => {
                         res.status(500).json({error: err})
                     })
             } else return res.status(404).json({
-                status: "error",
                 message: "match not found"
             })
         })
