@@ -30,4 +30,7 @@ router.patch('/', Auth.isLoggedIn, UserController.user_update);
 
 router.get('/:username', UserController.user_get_info);
 
+//Возвращает список команд, капитаном которых являетс текущий пользователь
+router.get('/teams', Auth.isLoggedIn, UserController.user_get_teams);
+
 module.exports = router;
