@@ -75,8 +75,9 @@ exports.user_update = (req, res, next) => {
 exports.user_get_info = async (req, res, next) => {
     try {
         const doc = await User.findOne({username: req.params.username})
-            .populate('selected_matches', 'selected_tournaments')
-            .select('_id account_id selected_matches selected_tournaments')
+            .populate('selected_matches').populate('selected_tournaments')
+            .select((req.user && (req.user.username === req.params.username)) ? '_id email' +
+                ' account_id selected_matches selected_tournaments' :'_id account_id')
             .exec();
         if (doc) {
             const response = {
