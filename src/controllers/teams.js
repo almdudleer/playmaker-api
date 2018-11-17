@@ -66,7 +66,14 @@ exports.team_get_one = async (req, res, next) => {
             res.status(404).json({error: "No such team"})
         }
     } catch (err) {
-        res.status(500).json({error: err.message})
+        if (err.kind === 'ObjectId') {
+            res.status(404).json({
+                successful: false,
+                message: 'Not found'
+            });
+        } else {
+            res.status(500).json({error: err.message})
+        }
     }
 };
 
@@ -106,7 +113,13 @@ exports.team_delete_one = async (req, res, next) => {
     } catch (err) {
         await session.abortTransaction();
         session.endSession();
-        res.status(500).json({error: err.message})
+        if (err.kind === 'ObjectId') {
+            res.status(404).json({
+                successful: false,
+                message: 'Not found'
+            });
+        } else
+            res.status(500).json({error: err.message})
     }
 
 };
@@ -144,7 +157,13 @@ exports.team_invite_player = async (req, res, next) => {
     } catch (err) {
         await session.abortTransaction();
         session.endSession();
-        res.status(500).json({error: err});
+        if (err.kind === 'ObjectId') {
+            res.status(404).json({
+                successful: false,
+                message: 'Not found'
+            });
+        } else
+            res.status(500).json({error: err});
     }
 };
 
@@ -179,7 +198,13 @@ exports.team_join = async (req, res, next) => {
     } catch (err) {
         await session.abortTransaction();
         session.endSession();
-        res.status(500).json({error: err});
+        if (err.kind === 'ObjectId') {
+            res.status(404).json({
+                successful: false,
+                message: 'Not found'
+            });
+        } else
+            res.status(500).json({error: err});
     }
 };
 
@@ -201,7 +226,10 @@ exports.team_delete_player = async (req, res, next) => {
         if (req.user._id.equals(req.body.userId) && team.captain.equals(req.user._id)) {
             await session.abortTransaction();
             session.endSession();
-            return res.status(200).json({successful: false, error: "Can't kick yourself, change captain or delete team"});
+            return res.status(200).json({
+                successful: false,
+                error: "Can't kick yourself, change captain or delete team"
+            });
         }
 
         if (!team.captain.equals(req.user._id) && !req.user._id.equals(req.body.userId)) {
@@ -217,9 +245,14 @@ exports.team_delete_player = async (req, res, next) => {
         session.endSession();
         res.status(200).json(response);
     } catch (err) {
-        console.log(err);
         await session.abortTransaction();
         session.endSession();
-        res.status(500).json({error: err});
+        if (err.kind === 'ObjectId') {
+            res.status(404).json({
+                successful: false,
+                message: 'Not found'
+            });
+        } else
+            res.status(500).json({error: err});
     }
 };

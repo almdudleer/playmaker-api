@@ -53,7 +53,13 @@ exports.tournament_get_one = async (req, res, next) => {
         };
         res.status(200).json(response);
     } catch (err) {
-        res.status(500).json({error: err});
+        if (err.kind === 'ObjectId') {
+            res.status(404).json({
+                successful: false,
+                message: 'Not found'
+            });
+        } else
+            res.status(500).json({error: err});
     }
 };
 
@@ -74,7 +80,13 @@ exports.tournament_delete_one = async (req, res, next) => {
             res.status(403).json(response);
         }
     } catch (err) {
-        res.status(500).json({error: err});
+        if (err.kind === 'ObjectId') {
+            res.status(404).json({
+                successful: false,
+                message: 'Not found'
+            });
+        } else
+            res.status(500).json({error: err});
     }
 };
 
@@ -138,7 +150,6 @@ exports.tournament_join = async (req, res, next) => {
         for (let i = 0; i < tournaments.teams.length; i++) {
             for (let j = 0; j < team.players.length; j++) {
                 if (tournaments.teams[i].players.indexOf(team.players[j]._id) > -1) {
-                    console.log("+++++");
                     res.status(200).json({
                         successful: false,
                         error: team.players[j].username + " is already participating in the tournament."
@@ -162,7 +173,13 @@ exports.tournament_join = async (req, res, next) => {
     } catch (err) {
         await session.abortTransaction();
         session.endSession();
-        res.status(500).json({error: err})
+        if (err.kind === 'ObjectId') {
+            res.status(404).json({
+                successful: false,
+                message: 'Not found'
+            });
+        } else
+            res.status(500).json({error: err})
     }
 };
 
@@ -179,7 +196,13 @@ exports.tournament_delete_team = async (req, res, next) => {
         };
         res.status(200).json(response);
     } catch (err) {
-        res.status(500).json({error: err});
+        if (err.kind === 'ObjectId') {
+            res.status(404).json({
+                successful: false,
+                message: 'Not found'
+            });
+        } else
+            res.status(500).json({error: err});
     }
 };
 
@@ -201,7 +224,13 @@ exports.tournament_update = async (req, res, next) => {
         };
         res.status(200).json(response);
     } catch (err) {
-        res.status(500).json({error: err});
+        if (err.kind === 'ObjectId') {
+            res.status(404).json({
+                successful: false,
+                message: 'Not found'
+            });
+        } else
+            res.status(500).json({error: err});
     }
 
 
@@ -224,6 +253,12 @@ exports.tournament_start = async (req, res, next) => {
             res.status(403).json({error: "Not owner"});
         }
     } catch (err) {
-        res.status(500).json({error: err});
+        if (err.kind === 'ObjectId') {
+            res.status(404).json({
+                successful: false,
+                message: 'Not found'
+            });
+        } else
+            res.status(500).json({error: err});
     }
 };

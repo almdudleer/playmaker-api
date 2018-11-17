@@ -56,7 +56,14 @@ exports.match_get_one = async (req, res, next) => {
             status: "ok",
             match: match
         };
-        res.status(200).json(response);
+        if (match) {
+            res.status(200).json(response);
+        } else {
+            res.status(404).json({
+                successful: false,
+                message: 'Not found'
+            });
+        }
     } catch (err) {
         res.status(500).json({error: err})
     }
