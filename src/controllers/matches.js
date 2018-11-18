@@ -3,11 +3,14 @@ const http = require('http');
 const mongoose = require('mongoose');
 const axios = require('axios');
 const steamApi = require('../steamEndpoints');
+const Tournament = require('../models/tournament');
 require('dotenv').config();
 
 exports.match_post_one = async (req, res, next) => {
-    //fetching data from Steam API
+    const session = await mongoose.startSession();
+    session.startTransaction();
     try {
+        //fetching data from Steam API
         const resp = await axios.get(steamApi.getMatchDetails, {
             params: {
                 match_id: req.body.matchId,
@@ -16,7 +19,32 @@ exports.match_post_one = async (req, res, next) => {
         });
         resp.data.result._id = resp.data.result.match_id;
         const match = new Match(resp.data.result);
-        const result = await match.save().exec();
+        let tournament = await Tournament.findOne({_id: req.body.tournamentId}).session(session);
+        if (!tournament) res.status(404).json({successful: false, message:'Not found'});
+        const bracketNode = tournament.finishMatch(req.body.matchNum, req.body.firstTeamWin, req.body.matchId);
+        //сопоставляем команды на сайте и в игре
+        if (match.radiant_win) {
+            if (req.body.firstTeamWon){
+                match.radiant_team = bracketNode.team1;
+                match.dire_team = bracketNode.team2;
+            } else {
+                match.radiant_team = bracketNode.team2;
+                match.dire_team = bracketNode.team1;
+            }
+        } else {
+            if (req.body.firstTeamWon){
+                match.radiant_team = bracketNode.team2;
+                match.dire_team = bracketNode.team1;
+            } else {
+                match.radiant_team = bracketNode.team1;
+                match.dire_team = bracketNode.team2;
+            }
+        }
+        match.$session(session);
+        const result = await match.save();
+        await tournament.save();
+        await session.commitTransaction();
+        session.endSession();
         res.status(200).json({
             status: "ok",
             message: "post /matches",
@@ -24,10 +52,18 @@ exports.match_post_one = async (req, res, next) => {
         });
     } catch (err) {
         console.log(err);
-        res.status(500).json({
-            status: "error",
-            error: err
-        });
+        await session.abortTransaction();
+        session.endSession();
+        if (err.kind === 'ObjectId') {
+            res.status(404).json({
+                successful: false,
+                message: 'Not found'
+            });
+        } else
+            res.status(500).json({
+                status: "error",
+                error: err
+            });
     }
 };
 

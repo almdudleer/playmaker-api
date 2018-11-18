@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 require('dotenv').config();
 
-exports.user_signup = (req, res, next) => {
+module.exports.user_signup = (req, res, next) => {
     User.register(new User({
         _id: new mongoose.Types.ObjectId,
         email: req.body.email,

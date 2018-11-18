@@ -12,8 +12,7 @@ exports.tournament_post_one = async (req, res, next) => {
             teamCount: req.body.teamCount,
             prizePool: req.body.prizePool,
         });
-        console.log(tournament.finished);
-        tournament = await tournament.save().exec();
+        tournament = await tournament.save();
         res.status(200).json({
             status: "ok",
             message: "post /tournaments",
@@ -45,7 +44,7 @@ exports.tournament_get_one = async (req, res, next) => {
     try {
         const tournament = await Tournament.findOne({_id: req.params.tournamentId})
             .populate('teams')
-            .select('name teamCount prizePool teams bracket owner description')
+            .select('winnerTeam finished name teamCount prizePool teams bracket owner description')
             .exec();
         const response = {
             status: "ok",
@@ -240,7 +239,14 @@ exports.tournament_start = async (req, res, next) => {
     try {
         let tournament = await Tournament.findOne({_id: req.params.tournamentId, owner: req.user._id}).exec();
         if (tournament) {
-            if (tournament.started) return res.status(200).json({message: "Tournament already started "});
+            if (tournament.started) return res.status(200).json({
+                successful: false,
+                message: "Tournament already started "
+            });
+            if (!tournament.owner.equals(req.user._id)) return res.status(403).json({
+                successful: false,
+                message: "Not owner"
+            });
             tournament.generateBracket();
             tournament.started = true;
             tournament = await tournament.save();
@@ -250,7 +256,10 @@ exports.tournament_start = async (req, res, next) => {
             };
             res.status(200).json(response);
         } else {
-            res.status(403).json({error: "Not owner"});
+            return res.status(404).json({
+                successful: false,
+                message: 'Not found'
+            });
         }
     } catch (err) {
         if (err.kind === 'ObjectId') {
