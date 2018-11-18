@@ -20,7 +20,8 @@ const tournamentSchema = mongoose.Schema({
         team2: mongoose.Schema.Types.ObjectId,
         stage: {type: Number, required: true, enum: [1, 2, 4, 8, 16, 32, 64]}, //стадия сетки (16 = 1/16, 4=1/4, 1=финал)
         parentMatch: {type: Number, required: true}, //_id следующего по сетке матча
-        finished: {type: Boolean, required: true, default: false},
+        finished: {type: Boolean, required: true, default: false}, //confirmed
+        matchId: Number,
         firstTeamWin: Boolean,
     }]
 });

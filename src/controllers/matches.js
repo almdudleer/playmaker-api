@@ -1,4 +1,5 @@
 const Match = require('../models/match');
+const Team = require('../models/team');
 const http = require('http');
 const mongoose = require('mongoose');
 const axios = require('axios');
@@ -20,11 +21,24 @@ exports.match_post_one = async (req, res, next) => {
         resp.data.result._id = resp.data.result.match_id;
         const match = new Match(resp.data.result);
         let tournament = await Tournament.findOne({_id: req.body.tournamentId}).session(session);
-        if (!tournament) res.status(404).json({successful: false, message:'Not found'});
+        if (!tournament) res.status(404).json({successful: false, message: 'Not found'});
+        const team1 = await Team.findById(tournament.bracket[req.body.matchNum - 1].team1).session(session);
+        const team2 = await Team.findById(tournament.bracket[req.body.matchNum - 1].team2).session(session);
+        //Матч может запостить один из капитанов, если матч еще не был завершен
+        //Владелец турнира может запостить даже завершенный матч, обновив его
+        if (!(tournament.owner.equals(req.user._id) ||
+            ((team1.captain.equals(req.user._id) || team2.captain.equals(req.user._id))
+                && !tournament.bracket[req.body.matchNum - 1].finished))) {
+            return res.status(403).json({
+                successful: false,
+                message: 'Not owner or captain'
+            });
+        }
         const bracketNode = tournament.finishMatch(req.body.matchNum, req.body.firstTeamWin, req.body.matchId);
         //сопоставляем команды на сайте и в игре
+        match.tournamentId = req.body.tournamentId;
         if (match.radiant_win) {
-            if (req.body.firstTeamWon){
+            if (req.body.firstTeamWon) {
                 match.radiant_team = bracketNode.team1;
                 match.dire_team = bracketNode.team2;
             } else {
@@ -32,7 +46,7 @@ exports.match_post_one = async (req, res, next) => {
                 match.dire_team = bracketNode.team1;
             }
         } else {
-            if (req.body.firstTeamWon){
+            if (req.body.firstTeamWon) {
                 match.radiant_team = bracketNode.team2;
                 match.dire_team = bracketNode.team1;
             } else {

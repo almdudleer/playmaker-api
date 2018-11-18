@@ -463,6 +463,10 @@ paths:
                   type: integer
                   required: true
                   example: 156594851
+                tournamentId:
+                  type: ObjectId
+                firstTeamWin:
+                  type: boolen
       responses:
         200:
           content:
@@ -772,4 +776,4 @@ components:
                     level:
                       type: integer
                       example: 1
-  
+
