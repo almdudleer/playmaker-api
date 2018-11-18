@@ -20,6 +20,8 @@ const tournamentSchema = mongoose.Schema({
         team2: mongoose.Schema.Types.ObjectId,
         stage: {type: Number, required: true, enum: [1, 2, 4, 8, 16, 32, 64]}, //стадия сетки (16 = 1/16, 4=1/4, 1=финал)
         parentMatch: {type: Number, required: true}, //_id следующего по сетке матча
+        finished: {type: Boolean, required: true, default: false},
+        firstTeamWin: Boolean,
     }]
 });
 
@@ -52,8 +54,6 @@ tournamentSchema.methods.generateBracket = function () {
         prevOffset = offset;
         offset += stage;
     }
-
-
     bracketSize = Math.ceil(Math.log2(teamsCount));
     bracketSize = Math.pow(2, bracketSize - 1);
     console.log(bracketSize);
@@ -63,7 +63,37 @@ tournamentSchema.methods.generateBracket = function () {
         else
             this.bracket[i % bracketSize].team2 = item._id;
     });
+
+    //Сразу завершаем матчи с одним участником
+    this.bracket.forEach((match, i) => {
+        if (match.stage === bracketSize && !match.team2) {
+            this.finishMatch(i + 1, true, null);
+        }
+    })
 };
 
+tournamentSchema.methods.finishMatch = function (matchNum, firstTeamWin, matchId) {
+    let match = this.bracket[matchNum - 1];
+    match.matchId = matchId;
+    match.firstTeamWon = firstTeamWin;
+    let winner;
+    if (firstTeamWin) winner = match.team1;
+    else winner = match.team2;
+    if (match.stage !== 1) {
+        //Продвигаем победителя по сетке
+        let parentMatch = this.bracket[match.parentMatch - 1];
+        if (matchNum % 2 === 0) {
+            parentMatch.team2 = winner;
+        } else {
+            parentMatch.team1 = winner;
+        }
+    } else {
+        //победитель финала становится победителем турнира
+        this.winnerTeam = winner;
+        //турнир (спектакль) окончен
+        this.finished = true;
+    }
+    return match;
+};
 
 module.exports = mongoose.model('Tournament', tournamentSchema);
