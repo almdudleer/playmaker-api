@@ -33,4 +33,6 @@ router.get('/:username', UserController.user_get_info);
 //Возвращает список команд, капитаном которых являетс текущий пользователь
 router.get('/teams', Auth.isLoggedIn, UserController.user_get_teams);
 
+router.get('/confirm/:key', UserController.user_confirm_email);
+
 module.exports = router;

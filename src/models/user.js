@@ -3,6 +3,8 @@ const passportLocalMongoose = require('passport-local-mongoose');
 const userSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     email: {type: String, required: true, unique: true},
+    confirmed: {type: Boolean, required: true, default: false},
+    confirmKey: String,
     accountId: Number,
     roles: {type: [{type: String}], default: ['USER']},
     invites: [{type: mongoose.Schema.Types.ObjectId, unique: true, ref: 'Team'}],
@@ -10,6 +12,11 @@ const userSchema = mongoose.Schema({
     selectedTournaments: [{type: mongoose.Schema.Types.ObjectId, ref: 'Tournament'}]
 });
 
-userSchema.plugin(passportLocalMongoose);
+userSchema.plugin(passportLocalMongoose, {
+    findByUsername: function (model, queryParameters) {
+        queryParameters.confirmed = true;
+        return model.findOne(queryParameters);
+    }
+});
 
 module.exports = mongoose.model('User', userSchema);

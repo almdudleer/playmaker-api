@@ -4,12 +4,17 @@ const Match = require('../models/match');
 const Tournament = require('../models/tournament');
 const mongoose = require('mongoose');
 const passport = require('passport');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 require('dotenv').config();
 
 module.exports.user_signup = (req, res, next) => {
+    let key = crypto.createHash('sha256').update(req.body.username).digest('hex');
     User.register(new User({
         _id: new mongoose.Types.ObjectId,
         email: req.body.email,
+        confirmed: false,
+        confirmKey: key,
         roles: ['USER'],
         username: req.body.username
     }), req.body.password, function (err, user) {
@@ -25,6 +30,29 @@ module.exports.user_signup = (req, res, next) => {
                 message: "User created"
             })
         }
+    });
+
+    const transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+            user: process.env.GMAIL_USER,
+            pass: process.env.GMAIL_PWD,
+        },
+    });
+
+    const mailOptions = {
+        from: process.env.GMAIL_USER,
+        to: req.body.email,
+        subject: 'Confirm your email',
+        html: '<p><a href="http://localhost:3000/api/user/confirm/' + key + '">Подтвердить</a></p><br>' +
+            '<p>http://localhost:3000/api/user/confirm/' + key + '</p>',
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log(error);
+        }
+        console.log(`Message sent: ${info.response}`);
     });
 };
 
@@ -78,7 +106,7 @@ exports.user_get_info = async (req, res, next) => {
         const doc = await User.findOne({username: req.params.username})
             .populate('selected_matches').populate('selected_tournaments')
             .select((req.user && (req.user.username === req.params.username)) ? '_id email' +
-                ' account_id selected_matches selected_tournaments' :'_id account_id')
+                ' account_id selected_matches selected_tournaments' : '_id account_id')
             .exec();
         if (doc) {
             const response = {
@@ -268,4 +296,14 @@ exports.user_get_teams = async (req, res, next) => {
     } catch (err) {
         res.status(500).json({error: err});
     }
+};
+
+exports.user_confirm_email = async (req, res, next) => {
+    await User.findOneAndUpdate({
+        confirmKey: req.params.key
+    }, {
+        confirmed: true,
+        confirmKey: null
+    });
+    res.status(200).json({kek: "kek"});
 };
