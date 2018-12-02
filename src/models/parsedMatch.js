@@ -21,7 +21,7 @@ const parsedMatchSchema = mongoose.Schema({
         lh_t: [],
         dn_t: [],
         xp_t: [],
-        player_slot: {type: Number, required:true},
+        player_slot: {type: Number, required: true},
         obs_placed: {type: Number, default: 0},
         sen_placed: {type: Number, default: 0},
         rune_pickups: {type: Number, default: 0},
@@ -29,10 +29,17 @@ const parsedMatchSchema = mongoose.Schema({
         roshans_killed: {type: Number, default: 0},
         pos: [
             {
+                _id: false,
                 x: Number,
                 y: Number
             }
-        ]
+        ],
+        obs_log: [{
+            _id: false,
+            time: Number,
+            x: Number,
+            y: Number
+        }]
     }],
 });
 

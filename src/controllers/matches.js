@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 const axios = require('axios');
 const steamApi = require('../steamEndpoints');
 const Tournament = require('../models/tournament');
+const parseReplay = require('../replayParser');
+const ParsedMatch = require('../models/parsedMatch');
 require('dotenv').config();
 
 exports.match_post_one = async (req, res, next) => {
@@ -56,9 +58,10 @@ exports.match_post_one = async (req, res, next) => {
         }
         match.$session(session);
         const result = await match.save();
-        await tournament.save();
+        //await tournament.save();
         await session.commitTransaction();
         session.endSession();
+        parseReplay(req.body.matchId);
         res.status(200).json({
             status: "ok",
             message: "post /matches",
