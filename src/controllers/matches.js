@@ -58,7 +58,7 @@ exports.match_post_one = async (req, res, next) => {
         }
         match.$session(session);
         const result = await match.save();
-        //await tournament.save();
+        await tournament.save();
         await session.commitTransaction();
         session.endSession();
         parseReplay(req.body.matchId);
