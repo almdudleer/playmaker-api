@@ -22,7 +22,7 @@ exports.team_post_one = async (req, res, next) => {
         await session.commitTransaction();
         session.endSession();
         res.status(200).json({
-            status: "ok",
+            successful: true,
             message: "post /teams",
             addedTeam: team
         });
@@ -31,7 +31,7 @@ exports.team_post_one = async (req, res, next) => {
         session.endSession();
         console.log(error);
         res.status(500).json({
-            status: "error",
+            successful: false,
             error: error
         });
     }

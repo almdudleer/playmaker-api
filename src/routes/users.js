@@ -28,7 +28,7 @@ router.get('/uexists', UserController.user_username_exists);
 
 router.patch('/', Auth.isLoggedIn, UserController.user_update);
 
-router.get('/:username', UserController.user_get_info);
+router.get('/info/:username', UserController.user_get_info);
 
 //Возвращает список команд, капитаном которых являетс текущий пользователь
 router.get('/teams', Auth.isLoggedIn, UserController.user_get_teams);
