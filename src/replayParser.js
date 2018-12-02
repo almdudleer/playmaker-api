@@ -32,4 +32,4 @@ function parseReplay(match_id) {
         })
 }
 
-parseReplay(4063486691);
+parseReplay(4245832190);

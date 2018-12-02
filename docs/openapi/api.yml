@@ -22,9 +22,9 @@ paths:
             application/json:
               schema:
                 properties:
-                  status:
-                    type: string
-                    example: "ok"
+                  successful:
+                  type: boolean
+                    example: true
                   count:
                     type: integer
                     example: 1
@@ -123,16 +123,16 @@ paths:
         required: true
         schema:
           type: ObjectId
-      description: "Add player to team"
+      description: "Invite player to team"
       requestBody:
         content:
           application/json:
             schema:
               properties:
-                userId:
-                  type: ObjectId
+                username:
+                  type: string
                   required: true
-                  example: "507f1f77bcf86cd799439011"
+                  example: "Bleizard"
       responses:
         200:
           content:
@@ -179,6 +179,33 @@ paths:
                   removedPlayer:
                     type: ObjectId
                     example: "507f1f77bcf86cd799439011"
+                  updatedTeam:
+                    type: object
+                    $ref: "#/components/schemas/Team"
+        500:
+          $ref: "#/components/responses/Error"
+
+  /teams/{teamId}/join:
+    post:
+      tags:
+      - TEAMS
+      summary: "POST /teams/{teamId}/players"
+      parameters:
+      - in: path
+        name: teamId
+        required: true
+        schema:
+          type: ObjectId
+      description: "Invite player to team"
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                properties:
+                  successful:
+                    type: boolean
+                    example: true
                   updatedTeam:
                     type: object
                     $ref: "#/components/schemas/Team"
@@ -510,9 +537,9 @@ components:
         application/json:
           schema:
             properties:
-              status:
-                type: String
-                example: "error"
+              successful:
+                type: boolean
+                  example: false
               error:
                 type: object
   schemas:
