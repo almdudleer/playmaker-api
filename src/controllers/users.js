@@ -52,7 +52,6 @@ module.exports.user_signup = (req, res, next) => {
         if (error) {
             console.log(error);
         }
-        console.log(`Message sent: ${info.response}`);
     });
 };
 
