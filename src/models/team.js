@@ -5,7 +5,7 @@ const teamSchema = mongoose.Schema({
     captain: {type: mongoose.Schema.Types.ObjectId, required: true},
     players: {
         type: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}],
-        validate: [playersLimit, '{PATH} exceeds the limit of 10']
+        validate: [playersLimit, '{PATH} exceeds the limit of 5']
     }
 });
 

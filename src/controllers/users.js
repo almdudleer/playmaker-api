@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const passport = require('passport');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const xmpp = require('simple-xmpp');
 require('dotenv').config();
 
 module.exports.user_signup = (req, res, next) => {
@@ -16,7 +17,8 @@ module.exports.user_signup = (req, res, next) => {
         confirmed: false,
         confirmKey: key,
         roles: ['USER'],
-        username: req.body.username
+        username: req.body.username,
+        jid: req.body.jid
     }), req.body.password, function (err, user) {
         console.log(user);
         if (err) {
@@ -31,6 +33,10 @@ module.exports.user_signup = (req, res, next) => {
             })
         }
     });
+
+    if (req.body.jid){
+        xmpp.subscribe(req.body.jid);
+    }
 
     const transporter = nodemailer.createTransport({
         service: 'Gmail',
@@ -77,27 +83,20 @@ exports.user_username_exists = async (req, res, next) => {
     })
 };
 
-exports.user_update = (req, res, next) => {
-    User.findOneAndUpdate(
-        {_id: req.user._id}, // почему не userId?
-        {
-            $set: {
-                email: req.body.email,
-                accountId: req.body.accountId
-            }
-        },
-        {new: true}
-    )
-        .exec()
-        .then(user => {
-            res.status(200).json({
-                message: "updated",
-                user: user
-            })
+exports.user_update = async (req, res, next) => {
+    try {
+        await User.findByIdAndUpdate(req.user._id, {
+            jid: req.body.jid || req.user.jid,
+        });
+        if (req.body.jid){
+            xmpp.subscribe(req.body.jid);
+        }
+        res.status(200).json({
+            successful: true
         })
-        .catch(err => {
-            res.status(500).json({error: err})
-        })
+    } catch (err) {
+        res.status(500).json({error: err})
+    }
 };
 
 exports.user_get_info = async (req, res, next) => {

@@ -1,6 +1,7 @@
 const Tournament = require('../models/tournament');
 const Team = require('../models/team');
 const mongoose = require('mongoose');
+const xmpp = require('simple-xmpp');
 require('dotenv').config();
 
 exports.tournament_post_one = async (req, res, next) => {
@@ -237,16 +238,20 @@ exports.tournament_update = async (req, res, next) => {
 
 exports.tournament_start = async (req, res, next) => {
     try {
-        let tournament = await Tournament.findOne({_id: req.params.tournamentId, owner: req.user._id}).exec();
+        let tournament = await Tournament.findOne({_id: req.params.tournamentId})
+            .populate({
+                path: 'teams',
+                populate: {path: 'players', select: 'jid'}
+            });
         if (tournament) {
             if (tournament.started) return res.status(200).json({
                 successful: false,
                 message: "Tournament already started "
             });
-            if (!tournament.owner.equals(req.user._id)) return res.status(403).json({
-                successful: false,
-                message: "Not owner"
-            });
+             if (!tournament.owner.equals(req.user._id)) return res.status(403).json({
+                 successful: false,
+                 message: "Not owner"
+             });
             tournament.generateBracket();
             tournament.started = true;
             tournament = await tournament.save();
@@ -255,6 +260,13 @@ exports.tournament_start = async (req, res, next) => {
                 updatedTournament: tournament
             };
             res.status(200).json(response);
+            for (let i = 0; i < tournament.teams.length; i++){
+                for (let j = 0; j < tournament.teams[i].players.length; j++){
+                    if (tournament.teams[i].players[j].jid){
+                        xmpp.send(tournament.teams[i].players[j].jid, `Турнир ${tournament.name} начался`);
+                    }
+                }
+            }
         } else {
             return res.status(404).json({
                 successful: false,
@@ -267,7 +279,9 @@ exports.tournament_start = async (req, res, next) => {
                 successful: false,
                 message: 'Not found'
             });
-        } else
+        } else {
             res.status(500).json({error: err});
+            console.log(err);
+        }
     }
 };

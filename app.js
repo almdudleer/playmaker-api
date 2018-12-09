@@ -13,9 +13,16 @@ const SteamStrategy = require('passport-steam').Strategy;
 const User = require('./src/models/user');
 const MongoStore = require('connect-mongo')(session);
 const cors = require('cors');
+const xmpp = require('simple-xmpp');
 
 require('dotenv').config();
 
+xmpp.connect({
+    jid: process.env.XMPP_LOGIN,
+    password: process.env.XMPP_PWD,
+    host: process.env.XMPP_HOST,
+    port: 5222
+});
 
 mongoose.connect(process.env.DB_CONNECTION_STRING, {
     useNewUrlParser: true,
@@ -46,7 +53,7 @@ passport.use(new SteamStrategy({
     passReqToCallback: true
 }, function (req, identifier, profile, done) {
     if (req.isAuthenticated()) {
-        User.findByIdAndUpdate(req.user._id, {openid: identifier}, {new: true}, (err, user) => {
+        User.findByIdAndUpdate(req.user._id, {openid: identifier, accountId: _json.steamid}, {new: true}, (err, user) => {
             return done(err, user);
         });
     } else {
