@@ -5,6 +5,7 @@ const userSchema = mongoose.Schema({
     email: {type: String, required: true, unique: true},
     confirmed: {type: Boolean, required: true, default: false},
     confirmKey: String,
+    openid: {type: String, unique: true},
     accountId: Number,
     roles: {type: [{type: String}], default: ['USER']},
     invites: [{type: mongoose.Schema.Types.ObjectId, unique: true, ref: 'Team'}],

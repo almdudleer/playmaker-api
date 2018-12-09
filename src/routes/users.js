@@ -8,12 +8,22 @@ const Auth = require('../controllers/auth');
 // frontend implemented:
 router.post('/signup', UserController.user_signup);
 
-router.post('/login', passport.authenticate('local'), (req, res, next) => {
+router.post('/login', Auth.isLoggedOut, passport.authenticate('local'), (req, res, next) => {
     console.log("successful");
     res.status(200).json({
         success: true,
         username: req.body.username
     })
+});
+
+router.post('/steam/delete', Auth.isLoggedIn, UserController.user_delete_openid);
+
+router.get('/steam/add', Auth.isLoggedIn, passport.authenticate('steam'));
+
+router.get('/steam/login', Auth.isLoggedOut, passport.authenticate('steam'));
+
+router.get('/steam/login/return', passport.authenticate('steam', {failureRedirectL: '/login'}), (req, res, next) => {
+    res.redirect('/');
 });
 
 router.post('/logout', Auth.isLoggedIn, UserController.user_logout);

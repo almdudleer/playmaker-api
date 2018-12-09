@@ -307,3 +307,10 @@ exports.user_confirm_email = async (req, res, next) => {
     });
     res.status(200).json({kek: "kek"});
 };
+
+exports.user_delete_openid = async (req, res, next) => {
+    await User.findByIdAndUpdate(req.user._id, {
+        $unset: {openid: ""}
+    });
+    res.status(200).json({kek: "kek"});
+};
