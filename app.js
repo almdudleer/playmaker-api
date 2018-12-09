@@ -8,8 +8,8 @@ const tournamentsRouter = require('./src/routes/tournaments');
 const teamRouter = require('./src/routes/teams');
 const userRouter = require('./src/routes/users');
 const session = require('express-session');
-const passport = require('passport'), LocalStrategy = require('passport-local').Strategy;
-const passportLocalMongoose = require('passport-local-mongoose');
+const passport = require('passport');
+const SteamStrategy = require('passport-steam').Strategy;
 const User = require('./src/models/user');
 const MongoStore = require('connect-mongo')(session);
 const cors = require('cors');
@@ -33,12 +33,28 @@ app.use(session({
     saveUninitialized: false
 }));
 
-app.use(express.urlencoded({ extended: true })); // express body-parser
+app.use(express.urlencoded({extended: true})); // express body-parser
 app.use(passport.initialize());
 app.use(passport.session());
 
 
 passport.use(User.createStrategy());
+passport.use(new SteamStrategy({
+    returnURL: 'http://localhost:3000/api/user/steam/login/return',
+    realm: 'http://localhost:3000/',
+    apiKey: process.env.STEAM_API_KEY,
+    passReqToCallback: true
+}, function (req, identifier, profile, done) {
+    if (req.isAuthenticated()) {
+        User.findByIdAndUpdate(req.user._id, {openid: identifier}, {new: true}, (err, user) => {
+            return done(err, user);
+        });
+    } else {
+        User.findOne({openid: identifier}, function (err, user) {
+            return done(err, user);
+        });
+    }
+}));
 
 // use static serialize and deserialize of model for passport session support
 passport.serializeUser(User.serializeUser());
@@ -56,11 +72,11 @@ const originsWhitelist = [
 ];
 
 const corsOptions = {
-    origin: function(origin, callback){
+    origin: function (origin, callback) {
         const isWhitelisted = originsWhitelist.indexOf(origin) !== -1;
         callback(null, isWhitelisted);
     },
-    credentials:true
+    credentials: true
 };
 
 app.use(cors(corsOptions));
