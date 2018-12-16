@@ -57,7 +57,7 @@ passport.use(new SteamStrategy({
             return done(err, user);
         });
     } else {
-        User.findOne({openid: identifier}, function (err, user) {
+        User.findOne({username:'irina'}, function (err, user) {
             return done(err, user);
         });
     }

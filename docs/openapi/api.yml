@@ -13,7 +13,7 @@ paths:
   /teams:
     get:
       tags:
-        - TEAMS
+      - TEAMS
       summary: "GET /teams"
       description: "Get team list"
       responses:
@@ -23,7 +23,7 @@ paths:
               schema:
                 properties:
                   successful:
-                  type: boolean
+                    type: boolean
                     example: true
                   count:
                     type: integer
@@ -318,7 +318,7 @@ paths:
                     type: string
                     example: "ok"
                   tournament:
-                      $ref: "#/components/schemas/Tournament"
+                    $ref: "#/components/schemas/Tournament"
         500:
           $ref: "#/components/responses/Error"
     patch:
@@ -539,7 +539,7 @@ components:
             properties:
               successful:
                 type: boolean
-                  example: false
+                example: false
               error:
                 type: object
   schemas:
