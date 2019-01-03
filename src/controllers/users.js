@@ -103,8 +103,8 @@ exports.user_get_info = async (req, res, next) => {
     try {
         const doc = await User.findOne({username: req.params.username})
             .populate('selected_matches').populate('selected_tournaments')
-            .select((req.user && (req.user.username === req.params.username)) ? '_id email' +
-                ' account_id selected_matches selected_tournaments' : '_id account_id')
+            .select((req.user && (req.user.username === req.params.username)) ? '_id email username' +
+                ' account_id selected_matches selected_tournaments' :'_id account_id username')
             .exec();
         if (doc) {
             const response = {
