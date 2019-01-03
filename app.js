@@ -53,11 +53,16 @@ passport.use(new SteamStrategy({
     passReqToCallback: true
 }, function (req, identifier, profile, done) {
     if (req.isAuthenticated()) {
-        User.findByIdAndUpdate(req.user._id, {openid: identifier, accountId: _json.steamid}, {new: true}, (err, user) => {
+        console.log(identifier);
+        console.log(profile);
+        User.findByIdAndUpdate(req.user._id, {
+            openid: identifier,
+            accountId: profile._json.steamid
+        }, {new: true}, (err, user) => {
             return done(err, user);
         });
     } else {
-        User.findOne({username:'irina'}, function (err, user) {
+        User.findOne({openid: identifier}, function (err, user) {
             return done(err, user);
         });
     }

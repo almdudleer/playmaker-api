@@ -18,12 +18,12 @@ router.post('/login', Auth.isLoggedOut, passport.authenticate('local'), (req, re
 
 router.post('/steam/delete', Auth.isLoggedIn, UserController.user_delete_openid);
 
-router.get('/steam/add', Auth.isLoggedIn, passport.authenticate('steam'));
+router.get('/steam/add', passport.authenticate('steam'));
 
 router.get('/steam/login', Auth.isLoggedOut, passport.authenticate('steam'));
 
 router.get('/steam/login/return', passport.authenticate('steam', {failureRedirectL: '/login'}), (req, res, next) => {
-    res.redirect('/');
+    res.redirect('http://localhost:4200');
 });
 
 router.post('/logout', Auth.isLoggedIn, UserController.user_logout);

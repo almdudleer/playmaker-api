@@ -244,14 +244,14 @@ exports.tournament_start = async (req, res, next) => {
                 populate: {path: 'players', select: 'jid'}
             });
         if (tournament) {
-            if (tournament.started) return res.status(200).json({
+            /*if (tournament.started) return res.status(200).json({
                 successful: false,
                 message: "Tournament already started "
             });
              if (!tournament.owner.equals(req.user._id)) return res.status(403).json({
                  successful: false,
                  message: "Not owner"
-             });
+             });*/
             tournament.generateBracket();
             tournament.started = true;
             tournament = await tournament.save();

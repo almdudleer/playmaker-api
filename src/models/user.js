@@ -5,7 +5,7 @@ const userSchema = mongoose.Schema({
     email: {type: String, required: true, unique: true, match: [/@/, 'Please fill a valid email address']},
     confirmed: {type: Boolean, required: true, default: false},
     confirmKey: String,
-    openid: {type: String, unique: true},
+    openid: {type: String, unique: false},
     jid: {type: String, match: [/@/, 'Please fill a valid jid']},
     accountId: {type: Number, unique: true},
     roles: {type: [{type: String}], default: ['USER']},
