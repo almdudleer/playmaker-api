@@ -85,14 +85,15 @@ exports.user_username_exists = async (req, res, next) => {
 
 exports.user_update = async (req, res, next) => {
     try {
-        await User.findByIdAndUpdate(req.user._id, {
+        let user = await User.findByIdAndUpdate(req.user._id, {
             jid: req.body.jid || req.user.jid,
-        });
+        }, {new: true});
         if (req.body.jid){
             xmpp.subscribe(req.body.jid);
         }
         res.status(200).json({
-            successful: true
+            successful: true,
+            user: user
         })
     } catch (err) {
         res.status(500).json({error: err})
@@ -103,8 +104,8 @@ exports.user_get_info = async (req, res, next) => {
     try {
         const doc = await User.findOne({username: req.params.username})
             .populate('selected_matches').populate('selected_tournaments')
-            .select((req.user && (req.user.username === req.params.username)) ? '_id email' +
-                ' account_id selected_matches selected_tournaments' : '_id account_id')
+            .select((req.user && (req.user.username === req.params.username)) ? '_id email jid' +
+                ' accountId selected_matches selected_tournaments' : '_id account_id')
             .exec();
         if (doc) {
             const response = {
