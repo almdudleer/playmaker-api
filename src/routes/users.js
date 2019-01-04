@@ -3,7 +3,9 @@ const router = express.Router();
 const passport = require('passport');
 const UserController = require('../controllers/users');
 const Auth = require('../controllers/auth');
+const multer = require('multer');
 
+const upload = multer();
 
 // frontend implemented:
 router.post('/signup', UserController.user_signup);
@@ -36,9 +38,11 @@ router.get('/uexists', UserController.user_username_exists);
 
 // frontend not implemented:
 
-router.patch('/', Auth.isLoggedIn, UserController.user_update);
+router.patch('/', Auth.isLoggedIn, upload.any(), UserController.user_update);
 
 router.get('/info/:username', UserController.user_get_info);
+
+router.get('/avatar/:username', UserController.get_avatar);
 
 //Возвращает список команд, капитаном которых являетс текущий пользователь
 router.get('/teams', Auth.isLoggedIn, UserController.user_get_teams);

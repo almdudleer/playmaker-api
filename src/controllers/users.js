@@ -34,7 +34,7 @@ module.exports.user_signup = (req, res, next) => {
         }
     });
 
-    if (req.body.jid){
+    if (req.body.jid) {
         xmpp.subscribe(req.body.jid);
     }
 
@@ -85,17 +85,35 @@ exports.user_username_exists = async (req, res, next) => {
 
 exports.user_update = async (req, res, next) => {
     try {
-        let user = await User.findByIdAndUpdate(req.user._id, {
-            jid: req.body.jid || req.user.jid,
-        }, {new: true});
-        if (req.body.jid){
+        let update = {};
+        if (req.files[0]) {
+            update = {
+                jid: req.body.jid || req.user.jid,
+                avatar: {
+                    data: req.files[0].buffer,
+                    contentType: req.files[0].mimetype
+                }
+            }
+        }
+        else {
+            update = {
+                jid: req.body.jid || req.user.jid
+            }
+        }
+
+        let user = await User.findByIdAndUpdate(req.user._id, update, {new: true});
+        if (req.body.jid) {
             xmpp.subscribe(req.body.jid);
         }
         res.status(200).json({
             successful: true,
             user: user
         })
-    } catch (err) {
+    }
+    catch
+        (err) {
+        console.log(JSON.stringify(err));
+        console.log(err);
         res.status(500).json({error: err})
     }
 };
@@ -308,8 +326,19 @@ exports.user_confirm_email = async (req, res, next) => {
 };
 
 exports.user_delete_openid = async (req, res, next) => {
-    await User.findByIdAndUpdate(req.user._id, {
-        $unset: {openid: ""}
-    });
-    res.status(200).json({kek: "kek"});
+    const user = await User.findByIdAndUpdate(req.user._id, {
+        $unset: {openid: "", accountId: ""}
+    }, {new: true});
+    console.log(user);
+    res.status(200).json({successful: true, user: user});
+};
+
+exports.get_avatar = async (req, res, next) => {
+    const user = await User.findOne({username: req.params.username});
+    if (user.avatar) {
+        res.set('Content-Type', user.avatar.contentType);
+        res.send(new Buffer(user.avatar.data));
+    } else {
+        res.status(200).json('kek');
+    }
 };

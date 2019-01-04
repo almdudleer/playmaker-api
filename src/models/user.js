@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const passportLocalMongoose = require('passport-local-mongoose');
 const userSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
+    avatar: {data: Buffer, contentType: String},
     email: {type: String, required: true, unique: true, match: [/@/, 'Please fill a valid email address']},
     confirmed: {type: Boolean, required: true, default: false},
     confirmKey: String,
