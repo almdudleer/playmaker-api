@@ -335,10 +335,19 @@ exports.user_delete_openid = async (req, res, next) => {
 
 exports.get_avatar = async (req, res, next) => {
     const user = await User.findOne({username: req.params.username});
-    if (user.avatar) {
+    if (user.avatar.data !== undefined) {
         res.set('Content-Type', user.avatar.contentType);
         res.send(new Buffer(user.avatar.data));
     } else {
-        res.status(200).json('kek');
+        res.sendFile('/dota.png', {root: __dirname + '../../../public/'});
     }
+};
+
+
+exports.user_get_invites = async (req, res, next) => {
+    const invites = await User.findById(req.user._id, 'invites');
+    res.status(200).json({
+        successful: true,
+        invites: invites
+    });
 };
