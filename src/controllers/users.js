@@ -64,7 +64,7 @@ module.exports.user_signup = (req, res, next) => {
 exports.user_email_exists = async (req, res, next) => {
     const user = await User.findOne(
         {
-            email: req.query.email
+            email: new RegExp(req.query.email, 'i')
         }
     ).exec();
     res.status(200).json({
@@ -75,7 +75,7 @@ exports.user_email_exists = async (req, res, next) => {
 exports.user_username_exists = async (req, res, next) => {
     const user = await User.findOne(
         {
-            username: req.query.username
+            username: new RegExp(req.query.username, 'i')
         }
     ).exec();
     res.status(200).json({
