@@ -345,9 +345,9 @@ exports.get_avatar = async (req, res, next) => {
 
 
 exports.user_get_invites = async (req, res, next) => {
-    const invites = await User.findById(req.user._id, 'invites');
+    const user = await User.findById(req.user._id, 'invites').populate('invites');
     res.status(200).json({
         successful: true,
-        invites: invites
+        invites: user.invites
     });
 };
