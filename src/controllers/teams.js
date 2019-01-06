@@ -58,7 +58,10 @@ exports.team_get_all = async (req, res, next) => {
 
 exports.team_get_one = async (req, res, next) => {
     try {
-        const team = await Team.findOne({_id: req.params.teamId}).populate('players', '_id username').exec();
+        const team = await Team.findOne({_id: req.params.teamId})
+            .populate('players', '_id username')
+            .populate('captain', '_id username')
+            .exec();
         if (team) {
             const response = {
                 success: true,
