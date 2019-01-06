@@ -293,7 +293,8 @@ exports.user_get_roles = (req, res, next) => {
         res.status(200).json({
             status: "ok",
             authGroup: req.user.roles,
-            username: req.user.username
+            username: req.user.username,
+            userId: req.user._id
         });
     } else {
         res.status(200).json({
