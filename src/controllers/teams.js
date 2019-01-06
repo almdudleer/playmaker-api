@@ -39,11 +39,14 @@ exports.team_post_one = async (req, res, next) => {
 
 exports.team_get_all = async (req, res, next) => {
     try {
-        const docs = await Team.find().populate('players', '_id username').exec();
+        const teams = await Team.find()
+            .populate('captain', '_id username')
+            .populate('players', '_id username')
+            .exec();
         const response = {
             status: "ok",
-            counts: docs.length,
-            teams: docs
+            count: teams.length,
+            teams: teams
         };
         res.status(200).json(response);
     } catch (err) {
