@@ -17,4 +17,6 @@ router.delete('/:teamId/players', Auth.isLoggedIn, TeamsController.team_delete_p
 
 router.post('/:teamId/join', Auth.isLoggedIn, TeamsController.team_join);
 
+router.get('/:teamId/tournaments', TeamsController.team_get_tournaments);
+
 module.exports = router;

@@ -1,5 +1,6 @@
 const Team = require('../models/team');
 const User = require('../models/user');
+const Tournament = require('../models/tournament');
 const mongoose = require('mongoose');
 require('dotenv').config();
 
@@ -58,7 +59,10 @@ exports.team_get_all = async (req, res, next) => {
 
 exports.team_get_one = async (req, res, next) => {
     try {
-        const team = await Team.findOne({_id: req.params.teamId}).populate('players', '_id username').exec();
+        const team = await Team.findOne({_id: req.params.teamId})
+            .populate('players', '_id username')
+            .populate('captain', '_id username')
+            .exec();
         if (team) {
             const response = {
                 success: true,
@@ -257,5 +261,18 @@ exports.team_delete_player = async (req, res, next) => {
             });
         } else
             res.status(500).json({error: err});
+    }
+};
+
+exports.team_get_tournaments = async (req, res, next) => {
+    try {
+        const tournaments = await Tournament.find({teams: req.params.teamId, started: req.query.finished}).select('name');
+        res.status(200).json({
+            successful: true,
+            tournaments: tournaments
+        });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({error: err})
     }
 };
