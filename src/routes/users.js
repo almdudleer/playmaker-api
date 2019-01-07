@@ -44,8 +44,8 @@ router.get('/info/:username', UserController.user_get_info);
 
 router.get('/avatar/:username', UserController.get_avatar);
 
-//Возвращает список команд, капитаном которых являетс текущий пользователь
-router.get('/teams/:userId', Auth.isLoggedIn, UserController.user_get_teams);
+
+router.get('/teams/:userId', UserController.user_get_teams);
 
 router.get('/invites', Auth.isLoggedIn, UserController.user_get_invites);
 
