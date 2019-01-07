@@ -18,6 +18,7 @@ const matchSchema = mongoose.Schema({
         account_id: Number,
         player_slot: Number,
         hero_id: Number,
+        hero_name: String,
         item_0: Number,
         item_1: Number,
         item_2: Number,

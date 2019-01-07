@@ -7,6 +7,7 @@ const steamApi = require('../steamEndpoints');
 const Tournament = require('../models/tournament');
 const parseReplay = require('../replayParser');
 const ParsedMatch = require('../models/parsedMatch');
+const heroNames = require('../util/heroes');
 require('dotenv').config();
 
 exports.match_post_one = async (req, res, next) => {
@@ -21,6 +22,10 @@ exports.match_post_one = async (req, res, next) => {
             }
         });
         resp.data.result._id = resp.data.result.match_id;
+        for (let i = 0; i < resp.data.result.players.length; i++) {
+            resp.data.result.players[i].hero_name = heroNames[resp.data.result.players[i].hero_id].name;
+        }
+
         const match = new Match(resp.data.result);
         let tournament = await Tournament.findOne({_id: req.body.tournamentId}).session(session);
         if (!tournament) res.status(404).json({successful: false, message: 'Not found'});
@@ -87,9 +92,18 @@ exports.match_post_one = async (req, res, next) => {
 
 exports.match_get_all = async (req, res, next) => {
     try {
+        let limit = +req.query.limit || 0;
         const matches = await Match.find()
-            .select('match_id start_time lobby_time players.player_slot players.account_id players.hero_id')
+            .select('_id start_time lobby_time players.player_slot players.account_id players.hero_id')
+            .limit(limit)
             .exec();
+
+        for (let i = 0; i < matches.length; i++) {
+            for (let j = 0; j < matches[i].players.length; j++) {
+                matches[i].players[j].hero_name = heroNames[matches[i].players[j].hero_id].name;
+            }
+        }
+
         const response = {
             status: "ok",
             counts: matches.length,
@@ -97,6 +111,7 @@ exports.match_get_all = async (req, res, next) => {
         };
         res.status(200).json(response);
     } catch (err) {
+        console.log(err);
         res.status(500).json({error: err})
     }
 
