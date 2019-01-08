@@ -121,9 +121,9 @@ exports.user_update = async (req, res, next) => {
 exports.user_get_info = async (req, res, next) => {
     try {
         const doc = await User.findOne({username: req.params.username})
-            .populate('selected_matches').populate('selected_tournaments')
+            .populate('selectedMatches').populate('selectedTournaments')
             .select((req.user && (req.user.username === req.params.username)) ? '_id email jid username' +
-                ' accountId selected_matches selected_tournaments' : '_id account_id username')
+                ' accountId selectedMatches selectedTournaments' : '_id account_id username')
             .exec();
         if (doc) {
             const response = {
@@ -146,7 +146,7 @@ exports.user_add_match = (req, res, next) => {
             if (match) { //Если существует матч с таким id
                 User.findOneAndUpdate(
                     {_id: req.params.userId},
-                    {$addToSet: {selected_matches: {_id: match._id}}},
+                    {$addToSet: {selectedMatches: {_id: match._id}}},
                     {new: true}
                 )
                     .exec()
@@ -178,7 +178,7 @@ exports.user_delete_match = (req, res, next) => {
             if (match) { //Если существует матч с передаваемым Id
                 User.findOneAndUpdate(
                     {_id: req.params.userId},
-                    {$pull: {selected_matches: {_id: match._id}}}, //Удаляем пользователя из команды
+                    {$pull: {selectedMatches: {_id: match._id}}}, //Удаляем пользователя из команды
                     {new: true}
                 )
                     .exec()
@@ -203,13 +203,13 @@ exports.user_delete_match = (req, res, next) => {
 };
 
 exports.user_add_tournament = (req, res, next) => {
-    Tournament.findById(req.body.tournamentId)
+    Tournament.findById(req.params.tournamentId)
         .exec()
         .then(tournament => {
             if (tournament) { //Если существует турнир с таким id
                 User.findOneAndUpdate(
-                    {_id: req.params.userId},
-                    {$addToSet: {selected_tournaments: {_id: tournament._id}}},
+                    {_id: req.user._id},
+                    {$addToSet: {selectedTournaments: {_id: tournament._id}}},
                     {new: true}
                 )
                     .exec()
@@ -241,7 +241,7 @@ exports.user_delete_tournament = (req, res, next) => {
             if (tournament) { //Если существует пользователь с передаваемым Id
                 User.findOneAndUpdate(
                     {_id: req.params.userId},
-                    {$pull: {selected_tournaments: {_id: tournament._id}}},
+                    {$pull: {selectedTournaments: {_id: tournament._id}}},
                     {new: true}
                 )
                     .exec()

@@ -7,7 +7,6 @@ const multer = require('multer');
 
 const upload = multer();
 
-// frontend implemented:
 router.post('/signup', UserController.user_signup);
 
 router.post('/login', Auth.isLoggedOut, passport.authenticate('local'), (req, res, next) => {
@@ -36,8 +35,6 @@ router.get('/eexists', UserController.user_email_exists);
 
 router.get('/uexists', UserController.user_username_exists);
 
-// frontend not implemented:
-
 router.patch('/', Auth.isLoggedIn, upload.any(), UserController.user_update);
 
 router.get('/info/:username', UserController.user_get_info);
@@ -50,5 +47,7 @@ router.get('/teams/:userId', UserController.user_get_teams);
 router.get('/invites', Auth.isLoggedIn, UserController.user_get_invites);
 
 router.get('/confirm/:key', UserController.user_confirm_email);
+
+router.post('/fav/:tournamentId', UserController.user_add_tournament);
 
 module.exports = router;
