@@ -119,7 +119,10 @@ exports.match_get_all = async (req, res, next) => {
 
 exports.match_get_one = async (req, res, next) => {
     try {
-        const match = await Match.findOne({_id: req.params.matchId}).exec();
+
+        let match = req.query.parsed ? await ParsedMatch.findOne({_id: req.params.matchId}).exec() :  await Match.findOne({_id: req.params.matchId}).exec();
+
+
         const response = {
             status: "ok",
             match: match
