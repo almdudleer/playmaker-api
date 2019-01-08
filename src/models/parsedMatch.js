@@ -16,6 +16,7 @@ const parsedMatchSchema = mongoose.Schema({
     radiant_gold_adv: [],
     radiant_xp_adv: [],
     players: [{
+        hero_name: String,
         times: [],
         gold_t: [],
         lh_t: [],
@@ -31,7 +32,8 @@ const parsedMatchSchema = mongoose.Schema({
             {
                 _id: false,
                 x: Number,
-                y: Number
+                y: Number,
+                value: Number
             }
         ],
         obs_log: [{

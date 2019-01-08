@@ -17,8 +17,8 @@ async function parseReplay(match_id) {
         let url = buildReplayUrl(replay.data[0].match_id, replay.data[0].cluster, replay.data[0].replay_salt);
         cp.exec(
             `curl --max-time 180 --fail ${url} | bunzip2 | curl -X POST -T - ${process.env.PARSER_HOST} | node src/processors/createParsedDataBlob.js ${match_id}`,
-            {shell: true, maxBuffer: 10 * 1024 * 1024},
-            (err, stdout) => {
+            {shell: true, maxBuffer: 30 * 1024 * 1024},
+            async (err, stdout) => {
                 if (err) {
                     return console.log(err);
                 }
