@@ -28,6 +28,7 @@ exports.tournament_get_all = async (req, res, next) => {
     try {
         const tournaments = await Tournament.find()
             .select('name teamCount prizePool teams bracket owner description')
+            .populate('owner', '_id username')
             .exec();
         const response = {
             status: "ok",

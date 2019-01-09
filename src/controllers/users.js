@@ -234,32 +234,37 @@ exports.user_add_tournament = (req, res, next) => {
         });
 };
 
-exports.user_delete_tournament = (req, res, next) => {
-    Tournament.findById(req.body.tournamentId)
+exports.user_delete_tournament = (req, res, next) => { // TODO: оптимизировать, искать не в турнирах, а в подписках
+    User.findById(req.user._id)
         .exec()
-        .then(tournament => {
-            if (tournament) { //Если существует пользователь с передаваемым Id
-                User.findOneAndUpdate(
-                    {_id: req.params.userId},
-                    {$pull: {selectedTournaments: {_id: tournament._id}}},
-                    {new: true}
-                )
-                    .exec()
-                    .then(user => {
-                        const response = {
-                            status: "ok",
-                            removedTournament: tournament,
-                            updatedUser: user
-                        };
-                        res.status(200).json(response);
-                    })
-                    .catch(err => {
-                        res.status(500).json({error: err})
-                    })
-            } else return res.status(404).json({
-                status: "error",
-                message: "tournament not found"
-            })
+        .then(user => {
+            user.selectedTournaments.pull({_id: req.params.tournamentId});
+            user.save();
+            // if (tournament) { //Если существует турнир с передаваемым Id
+            //     User.findOneAndUpdate(
+            //         {_id: req.user._id},
+            //         {$pull: {selectedTournaments: {_id: tournament._id}}},
+            //     )
+            //         .exec()
+            //         .then(user => {
+            //             const response = {
+            //                 status: "ok",
+            //                 removedTournament: tournament,
+            //                 updatedUser: user
+            //             };
+            //             res.status(200).json(response);
+            //         })
+            //         .catch(err => {
+            //             res.status(500).json({error: err})
+            //         })
+            // } else return res.status(404).json({
+            //     status: "error",
+            //     message: "tournament not found"
+            // })
+            const response = {
+                status: "ok"
+            };
+            res.status(200).json(response)
         })
         .catch(err => {
             res.status(500).json({error: err})

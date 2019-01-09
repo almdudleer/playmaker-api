@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const tournamentSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
-    owner: {type: mongoose.Schema.Types.ObjectId, required: true},
+    owner: {type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true},
     description: String,
     name: {type: String, required: true, unique: true},
     teamCount: {type: Number, enum: [4, 8, 16, 32, 64]},
@@ -16,8 +16,8 @@ const tournamentSchema = mongoose.Schema({
     },
     bracket: [{
         _id: Number,
-        team1: mongoose.Schema.Types.ObjectId, //команды участницы
-        team2: mongoose.Schema.Types.ObjectId,
+        team1: {type: mongoose.Schema.Types.ObjectId, ref: 'Team'}, //команды участницы
+        team2: {type: mongoose.Schema.Types.ObjectId, ref: 'Team'},
         stage: {type: Number, required: true, enum: [1, 2, 4, 8, 16, 32, 64]}, //стадия сетки (16 = 1/16, 4=1/4, 1=финал)
         parentMatch: {type: Number, required: true}, //_id следующего по сетке матча
         finished: {type: Boolean, required: true, default: false}, //confirmed

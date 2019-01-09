@@ -48,6 +48,8 @@ router.get('/invites', Auth.isLoggedIn, UserController.user_get_invites);
 
 router.get('/confirm/:key', UserController.user_confirm_email);
 
-router.post('/fav/:tournamentId', UserController.user_add_tournament);
+router.post('/fav/follow/:tournamentId', UserController.user_add_tournament);
+
+router.post('/fav/unfollow/:tournamentId', UserController.user_delete_tournament);
 
 module.exports = router;
