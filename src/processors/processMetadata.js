@@ -3,6 +3,7 @@
  * */
 function processMetadata(entries) {
     const heroToSlot = {};
+    const slotToHero = Array(10).fill('');
     const slotToPlayerslot = {};
     const heroIdToSlot = {};
     let gameZero = 0;
@@ -34,6 +35,7 @@ function processMetadata(entries) {
                 // the first letter is always capitalized and will be converted to underscore
                 const combatLogName2 = `npc_dota_hero${ending.replace(/([A-Z])/g, $1 =>
                     `_${$1.toLowerCase()}`).toLowerCase()}`;
+                slotToHero[e.slot] = ending;
                 heroToSlot[combatLogName] = e.slot;
                 heroToSlot[combatLogName2] = e.slot;
                 heroIdToSlot[e.hero_id] = e.slot;
@@ -51,6 +53,7 @@ function processMetadata(entries) {
         }
     }
     return {
+        slot_to_hero: slotToHero,
         game_zero: gameZero,
         hero_to_slot: heroToSlot,
         slot_to_playerslot: slotToPlayerslot,

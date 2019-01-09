@@ -1,6 +1,8 @@
 function processParsedData(entries, container, meta) {
     for (let i = 0; i < 10; i++) {
         container.players[i].player_slot = i;
+        container.players[i].pre_pos = Array.from(Array(201), _ => Array(201).fill(0));
+        container.players[i].hero_name = meta.slot_to_hero[i];
     }
     for (let i = 0; i < entries.length; i += 1) {
         const e = entries[i];
@@ -21,10 +23,9 @@ function parseEntry(e, container, meta) {
                 player.dn_t.push(e.denies);
             }
             if (e.time >= meta.game_start && e.time <= 600) {
-                player.pos.push({
-                    x: e.x,
-                    y: e.y
-                })
+
+                if (e.x && e.y)
+                    player.pre_pos[e.x][e.y]++;
             }
             if (e.time === meta.game_end) {
                 player.obs_placed = e.obs_placed;

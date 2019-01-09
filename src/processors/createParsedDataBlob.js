@@ -7,6 +7,7 @@ const processParsedData = require('./processParsedData');
 const processMetadata = require('./processMetadata');
 const fs = require('fs');
 const ParsedMatch = require('../models/parsedMatch');
+
 // const processDraftTimings = require('../processors/processDraftTimings');
 
 
@@ -24,6 +25,7 @@ function getParseSchema() {
         players: Array(...new Array(10)).map(() =>
             ({
                 player_slot: 0,
+                hero_name: '',
                 obs_placed: 0,
                 sen_placed: 0,
                 creeps_stacked: 0,
@@ -51,7 +53,7 @@ function getParseSchema() {
                 kills_log: [],
                 buyback_log: [],
                 runes_log: [],
-                // "pos": {},
+                pos: [],
                 lane_pos: {},
                 obs: {},
                 sen: {},
@@ -79,7 +81,7 @@ function getParseSchema() {
                 randomed: false,
                 repicked: false,
                 pred_vict: false,
-                pos: [],
+                pre_pos: [],
             })),
     };
 }
@@ -91,6 +93,21 @@ function createParsedDataBlob(entries, matchId) {
         e.time -= meta.game_zero;
     });
     const result = processParsedData(entries, getParseSchema(), meta);
+    //!!!!!WARNING GOVNOCODE
+    for (let i = 0; i < result.players.length; i++) {
+        let player = result.players[i];
+        for (let j = 0; j < 200; j++) {
+            for (let k = 0; k < 200; k++) {
+                if (player.pre_pos[j][k]) {
+                    player.pos.push({
+                        x: j - 60,
+                        y: 128 - (k  - 60),
+                        value: player.pre_pos[j][k]
+                    })
+                }
+            }
+        }
+    }
     return result;
 }
 
