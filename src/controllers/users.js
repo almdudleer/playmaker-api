@@ -234,41 +234,22 @@ exports.user_add_tournament = (req, res, next) => {
         });
 };
 
-exports.user_delete_tournament = (req, res, next) => { // TODO: оптимизировать, искать не в турнирах, а в подписках
-    User.findById(req.user._id)
-        .exec()
-        .then(user => {
-            user.selectedTournaments.pull({_id: req.params.tournamentId});
-            user.save();
-            // if (tournament) { //Если существует турнир с передаваемым Id
-            //     User.findOneAndUpdate(
-            //         {_id: req.user._id},
-            //         {$pull: {selectedTournaments: {_id: tournament._id}}},
-            //     )
-            //         .exec()
-            //         .then(user => {
-            //             const response = {
-            //                 status: "ok",
-            //                 removedTournament: tournament,
-            //                 updatedUser: user
-            //             };
-            //             res.status(200).json(response);
-            //         })
-            //         .catch(err => {
-            //             res.status(500).json({error: err})
-            //         })
-            // } else return res.status(404).json({
-            //     status: "error",
-            //     message: "tournament not found"
-            // })
-            const response = {
-                status: "ok"
-            };
-            res.status(200).json(response)
-        })
-        .catch(err => {
-            res.status(500).json({error: err})
+exports.user_delete_tournament = async (req, res, next) => {
+
+    try {
+        const user = await User.findByIdAndUpdate(req.user._id, {
+            $pull: {selectedTournaments: {_id: req.params.tournamentId}}
         });
+        const response = {
+            status: "ok"
+        };
+        res.status(200).json(response);
+    } catch (err) {
+        res.status(500).json({error: err})
+
+    }
+
+
 };
 
 exports.user_restore_password = (req, res, next) => {
