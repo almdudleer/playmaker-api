@@ -1,5 +1,6 @@
 const Match = require('../models/match');
 const Team = require('../models/team');
+const Item = require('../models/item');
 const http = require('http');
 const mongoose = require('mongoose');
 const axios = require('axios');
@@ -120,7 +121,18 @@ exports.match_get_all = async (req, res, next) => {
 exports.match_get_one = async (req, res, next) => {
     try {
 
-        let match = req.query.parsed ? await ParsedMatch.findOne({_id: req.params.matchId}).exec() : await Match.findOne({_id: req.params.matchId}).exec();
+        let match = req.query.parsed ? await ParsedMatch.findOne({_id: req.params.matchId}).exec() :
+            await Match.findOne({_id: req.params.matchId})
+                .populate('players.item_0')
+                .populate('players.item_1')
+                .populate('players.item_2')
+                .populate('players.item_3')
+                .populate('players.item_4')
+                .populate('players.item_5')
+                .populate('players.backpack_0')
+                .populate('players.backpack_1')
+                .populate('players.backpack_2');
+
 
 
         const response = {
