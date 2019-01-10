@@ -44,6 +44,7 @@ const matchSchema = mongoose.Schema({
         ability_upgrades: [{
             _id: false,
             ability: Number,
+            name: String,
             time: Number,
             level: Number
         }]

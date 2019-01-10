@@ -9,6 +9,7 @@ const Tournament = require('../models/tournament');
 const parseReplay = require('../replayParser');
 const ParsedMatch = require('../models/parsedMatch');
 const heroNames = require('../util/heroes');
+const abilities = require('../util/abilities');
 require('dotenv').config();
 
 exports.match_post_one = async (req, res, next) => {
@@ -25,6 +26,7 @@ exports.match_post_one = async (req, res, next) => {
         resp.data.result._id = resp.data.result.match_id;
         for (let i = 0; i < resp.data.result.players.length; i++) {
             resp.data.result.players[i].hero_name = heroNames[resp.data.result.players[i].hero_id].name;
+            console.log(resp.data.result.players[i].ability_upgrades);
         }
 
         const match = new Match(resp.data.result);
@@ -133,8 +135,6 @@ exports.match_get_one = async (req, res, next) => {
                 .populate('players.backpack_1')
                 .populate('players.backpack_2');
 
-
-
         const response = {
             status: "ok",
             match: match
@@ -177,6 +177,9 @@ exports.match_parse = async (req, res, next) => {
         resp.data.result._id = resp.data.result.match_id;
         for (let i = 0; i < resp.data.result.players.length; i++) {
             resp.data.result.players[i].hero_name = heroNames[resp.data.result.players[i].hero_id].name;
+            resp.data.result.players[i].ability_upgrades.forEach((ability) => {
+                ability.name = abilities[ability.ability];
+            });
         }
 
         const match = new Match(resp.data.result);
