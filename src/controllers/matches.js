@@ -120,7 +120,7 @@ exports.match_get_all = async (req, res, next) => {
 exports.match_get_one = async (req, res, next) => {
     try {
 
-        let match = req.query.parsed ? await ParsedMatch.findOne({_id: req.params.matchId}).exec() :  await Match.findOne({_id: req.params.matchId}).exec();
+        let match = req.query.parsed ? await ParsedMatch.findOne({_id: req.params.matchId}).exec() : await Match.findOne({_id: req.params.matchId}).exec();
 
 
         const response = {
@@ -150,5 +150,31 @@ exports.match_delete_one = async (req, res, next) => {
         res.status(200).json(response);
     } catch (err) {
         res.status(500).json({error: err})
+    }
+};
+
+exports.match_parse = async (req, res, next) => {
+    try {
+        parseReplay(req.params.matchId);
+        const resp = await axios.get(steamApi.getMatchDetails, {
+            params: {
+                match_id: req.params.matchId,
+                key: process.env.STEAM_API_KEY
+            }
+        });
+        resp.data.result._id = resp.data.result.match_id;
+        for (let i = 0; i < resp.data.result.players.length; i++) {
+            resp.data.result.players[i].hero_name = heroNames[resp.data.result.players[i].hero_id].name;
+        }
+
+        const match = new Match(resp.data.result);
+        await match.save();
+        res.status(200).json({
+            status: "ok",
+            message: "post /matches"
+        });
+        console.log(1);
+    } catch (e) {
+        console.log(e);
     }
 };

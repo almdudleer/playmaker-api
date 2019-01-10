@@ -5,6 +5,7 @@ const readline = require('readline');
 // const processUploadProps = require('../processors/processUploadProps');
 const processParsedData = require('./processParsedData');
 const processMetadata = require('./processMetadata');
+const processAllPlayers = require('./processAllPlayers');
 const fs = require('fs');
 const ParsedMatch = require('../models/parsedMatch');
 
@@ -108,6 +109,12 @@ function createParsedDataBlob(entries, matchId) {
             }
         }
     }
+
+    const ap = processAllPlayers(entries, meta);
+
+    result.radiant_gold_adv = ap.radiant_gold_adv;
+    result.radiant_xp_adv = ap.radiant_xp_adv;
+
     return result;
 }
 

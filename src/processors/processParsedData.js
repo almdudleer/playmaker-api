@@ -8,6 +8,7 @@ function processParsedData(entries, container, meta) {
         const e = entries[i];
         parseEntry(e, container, meta);
     }
+
     return container;
 }
 
