@@ -94,8 +94,7 @@ exports.user_update = async (req, res, next) => {
                     contentType: req.files[0].mimetype
                 }
             }
-        }
-        else {
+        } else {
             update = {
                 jid: req.body.jid || req.user.jid
             }
@@ -109,8 +108,7 @@ exports.user_update = async (req, res, next) => {
             successful: true,
             user: user
         })
-    }
-    catch
+    } catch
         (err) {
         console.log(JSON.stringify(err));
         console.log(err);
@@ -234,22 +232,17 @@ exports.user_add_tournament = (req, res, next) => {
         });
 };
 
-exports.user_delete_tournament = async (req, res, next) => {
-
-    try {
-        const user = await User.findByIdAndUpdate(req.user._id, {
-            $pull: {selectedTournaments: {_id: req.params.tournamentId}}
-        });
-        const response = {
-            status: "ok"
-        };
-        res.status(200).json(response);
-    } catch (err) {
-        res.status(500).json({error: err})
-
-    }
-
-
+exports.user_delete_tournament = (req, res, next) => {
+    User.findById(req.user._id)
+        .exec()
+        .then(user => {
+            user.selectedTournaments.pull({_id: req.params.tournamentId});
+            user.save();
+            const response = {
+                status: "ok"
+            };
+            res.status(200).json(response);
+        })
 };
 
 exports.user_restore_password = (req, res, next) => {
