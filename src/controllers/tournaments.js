@@ -50,7 +50,7 @@ exports.tournament_get_one = async (req, res, next) => {
                 populate: {path: 'captain', select: '_id'}
             })
             .populate('owner')
-            .select('winnerTeam finished name teamCount prizePool teams bracket owner description')
+            .select('winnerTeam started finished name teamCount prizePool teams bracket owner description')
             .exec();
         const response = {
             status: "ok",
@@ -246,8 +246,11 @@ exports.tournament_start = async (req, res, next) => {
         let tournament = await Tournament.findOne({_id: req.params.tournamentId})
             .populate({
                 path: 'teams',
-                populate: {path: 'players', select: 'jid'}
-            });
+                populate: {path: 'captain', select: '_id'}
+            })
+            .populate('owner')
+            .select('winnerTeam started finished name teamCount prizePool teams bracket owner description')
+            .exec();
         if (tournament) {
             /*if (tournament.started) return res.status(200).json({
                 successful: false,
