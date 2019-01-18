@@ -45,7 +45,11 @@ exports.tournament_get_all = async (req, res, next) => {
 exports.tournament_get_one = async (req, res, next) => {
     try {
         const tournament = await Tournament.findOne({_id: req.params.tournamentId})
-            .populate('teams')
+            .populate({
+                path: 'teams',
+                populate: {path: 'captain', select: '_id'}
+            })
+            .populate('owner')
             .select('winnerTeam finished name teamCount prizePool teams bracket owner description')
             .exec();
         const response = {
