@@ -77,6 +77,7 @@ tournamentSchema.methods.finishMatch = function (matchNum, firstTeamWin, matchId
     let match = this.bracket[matchNum - 1];
     match.matchId = matchId;
     match.firstTeamWin = firstTeamWin;
+    match.finished = true;
     let winner;
     if (firstTeamWin) winner = match.team1;
     else winner = match.team2;

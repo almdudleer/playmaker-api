@@ -26,11 +26,16 @@ exports.match_post_one = async (req, res, next) => {
         resp.data.result._id = resp.data.result.match_id;
         for (let i = 0; i < resp.data.result.players.length; i++) {
             resp.data.result.players[i].hero_name = heroNames[resp.data.result.players[i].hero_id].name;
-            console.log(resp.data.result.players[i].ability_upgrades);
+            resp.data.result.players[i].ability_upgrades.forEach((ability) => {
+                ability.name = abilities[ability.ability];
+            });
         }
 
         const match = new Match(resp.data.result);
-        let tournament = await Tournament.findOne({_id: req.body.tournamentId}).session(session);
+        let tournament = await Tournament.findOne({_id: req.body.tournamentId})
+            .populate('teams')
+            .select('winnerTeam finished name teamCount prizePool teams bracket owner description')
+            .session(session);
         if (!tournament) res.status(404).json({successful: false, message: 'Not found'});
         const team1 = await Team.findById(tournament.bracket[req.body.matchNum - 1].team1).session(session);
         const team2 = await Team.findById(tournament.bracket[req.body.matchNum - 1].team2).session(session);
@@ -48,7 +53,7 @@ exports.match_post_one = async (req, res, next) => {
         //сопоставляем команды на сайте и в игре
         match.tournamentId = req.body.tournamentId;
         if (match.radiant_win) {
-            if (req.body.firstTeamWon) {
+            if (req.body.firstTeamWin) {
                 match.radiant_team = bracketNode.team1;
                 match.dire_team = bracketNode.team2;
             } else {
@@ -56,7 +61,7 @@ exports.match_post_one = async (req, res, next) => {
                 match.dire_team = bracketNode.team1;
             }
         } else {
-            if (req.body.firstTeamWon) {
+            if (req.body.firstTeamWin) {
                 match.radiant_team = bracketNode.team2;
                 match.dire_team = bracketNode.team1;
             } else {
@@ -73,7 +78,7 @@ exports.match_post_one = async (req, res, next) => {
         res.status(200).json({
             status: "ok",
             message: "post /matches",
-            addedMatch: result
+            updatedTournament: tournament
         });
     } catch (err) {
         console.log(err);
