@@ -260,14 +260,16 @@ exports.tournament_start = async (req, res, next) => {
                 status: "ok",
                 updatedTournament: tournament
             };
-            res.status(200).json(response);
-            for (let i = 0; i < tournament.teams.length; i++){
-                for (let j = 0; j < tournament.teams[i].players.length; j++){
-                    if (tournament.teams[i].players[j].jid){
+
+            for (let i = 0; i < tournament.teams.length; i++) {
+                for (let j = 0; j < tournament.teams[i].players.length; j++) {
+                    if (tournament.teams[i].players[j].jid) {
                         xmpp.send(tournament.teams[i].players[j].jid, `Турнир ${tournament.name} начался`);
                     }
                 }
             }
+
+            res.status(200).json(response);
         } else {
             return res.status(404).json({
                 successful: false,
