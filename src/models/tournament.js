@@ -1,4 +1,7 @@
 const mongoose = require('mongoose');
+const User = require('./user');
+const Team = require('./team');
+const xmpp = require('simple-xmpp');
 
 const tournamentSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
@@ -86,8 +89,37 @@ tournamentSchema.methods.finishMatch = function (matchNum, firstTeamWin, matchId
         let parentMatch = this.bracket[match.parentMatch - 1];
         if (matchNum % 2 === 0) {
             parentMatch.team2 = winner;
+            if (parentMatch.team1) {
+                Team.findById(parentMatch.team1)
+                    .populate('players')
+                    .then(team => {
+                        for (let i = 0; i < team.players.length; i++) {
+                            if (team.players[i].jid){
+                                xmpp.send(team.players[i].jid, 'Your next opponent is ready');
+                            }
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
+            }
         } else {
             parentMatch.team1 = winner;
+            if (parentMatch.team2) {
+                Team.findById(parentMatch.team2)
+                    .populate('players')
+                    .then(team => {
+                        for (let i = 0; i < team.players.length; i++) {
+                            if (team.players[i].jid){
+                                xmpp.send(team.players[i].jid, 'Your next opponent is ready');
+                            }
+                        }
+                    })
+                    .catch(err => {
+                        console.log(err);
+                    });
+            }
+
         }
     } else {
         //победитель финала становится победителем турнира

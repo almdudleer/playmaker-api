@@ -1,5 +1,6 @@
 const Tournament = require('../models/tournament');
 const Team = require('../models/team');
+const User = require('../models/user');
 const mongoose = require('mongoose');
 const xmpp = require('simple-xmpp');
 require('dotenv').config();
@@ -271,8 +272,16 @@ exports.tournament_start = async (req, res, next) => {
             for (let i = 0; i < tournament.teams.length; i++) {
                 for (let j = 0; j < tournament.teams[i].players.length; j++) {
                     if (tournament.teams[i].players[j].jid) {
-                        xmpp.send(tournament.teams[i].players[j].jid, `Турнир ${tournament.name} начался`);
+                        xmpp.send(tournament.teams[i].players[j].jid, `Tournament ${tournament.name} has been started`);
                     }
+                }
+            }
+
+            let subs = User.find({selectedTournaments: tournament._id});
+
+            for (let i = 0; i < subs.length; i++) {
+                if (subs[i].jid) {
+                    xmpp.send(subs[i].jid, `Tournament ${tournament.name} has been started`)
                 }
             }
 

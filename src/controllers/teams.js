@@ -2,6 +2,7 @@ const Team = require('../models/team');
 const User = require('../models/user');
 const Tournament = require('../models/tournament');
 const mongoose = require('mongoose');
+const xmpp = require('simple-xmpp');
 require('dotenv').config();
 
 exports.team_post_one = async (req, res, next) => {
@@ -156,6 +157,9 @@ exports.team_invite_player = async (req, res, next) => {
             session.endSession();
             return;
         }
+        if (user.jid) {
+            xmpp.send(user.jid, `You have been invited to the team "${team.name}".`);
+        }
         res.status(200).json({
             successful: true
         });
@@ -197,6 +201,12 @@ exports.team_join = async (req, res, next) => {
             {$addToSet: {players: {_id: req.user._id}}}
         ).session(session);
 
+        const captain = await User.findById(team.captain).session(session);
+
+        if (captain.jid) {
+            xmpp.send(captain.jid, `${user.username} accepted your invite to the team "${team.name}"`);
+        }
+
         res.status(200).json({
             successful: true
         });
@@ -223,7 +233,11 @@ exports.team_delete_player = async (req, res, next) => {
             {_id: req.params.teamId},
             {$pull: {players: req.body.userId}}, //Удаляем пользователя из команды
             {new: true}
-        ).session(session).exec();
+        )
+            .populate('players', '_id username')
+            .populate('captain', '_id username')
+            .session(session)
+            .exec();
         if (!team) {
             await session.abortTransaction();
             session.endSession();
@@ -266,7 +280,10 @@ exports.team_delete_player = async (req, res, next) => {
 
 exports.team_get_tournaments = async (req, res, next) => {
     try {
-        const tournaments = await Tournament.find({teams: req.params.teamId, started: req.query.finished}).select('name');
+        const tournaments = await Tournament.find({
+            teams: req.params.teamId,
+            started: req.query.finished
+        }).select('name');
         res.status(200).json({
             successful: true,
             tournaments: tournaments
