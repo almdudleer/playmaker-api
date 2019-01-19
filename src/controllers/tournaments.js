@@ -129,21 +129,28 @@ exports.tournament_join = async (req, res, next) => {
             return;
         }
 
-        const tournaments = await Tournament.findOneAndUpdate(
+        let tournament = await Tournament.findOneAndUpdate(
             {_id: req.params.tournamentId},
             {$addToSet: {teams: {_id: team._id}}}
-        ).populate({
-            path: 'teams'
-        }).session(session);
+        )
+            .populate('teams')
+            .session(session);
 
-        if (!tournaments) {
-            res.status(404).json({error: "tournament not fount"});
+        if (!tournament) {
+            res.status(404).json({error: "tournament not found"});
             await session.abortTransaction();
             session.endSession();
             return;
         }
 
-        if (tournaments.teams.length >= tournaments.teamCount) {
+        if (tournament.started) {
+            res.status(200).json({
+                successful: false,
+                error: "Tournament started"
+            });
+        }
+
+        if (tournament.teams.length >= tournament.teamCount) {
             res.status(200).json({
                 successful: false,
                 error: "No slots"
@@ -153,9 +160,9 @@ exports.tournament_join = async (req, res, next) => {
             return;
         }
 
-        for (let i = 0; i < tournaments.teams.length; i++) {
+        for (let i = 0; i < tournament.teams.length; i++) {
             for (let j = 0; j < team.players.length; j++) {
-                if (tournaments.teams[i].players.indexOf(team.players[j]._id) > -1) {
+                if (tournament.teams[i].players.indexOf(team.players[j]._id) > -1) {
                     res.status(200).json({
                         successful: false,
                         error: team.players[j].username + " is already participating in the tournament."
@@ -167,10 +174,19 @@ exports.tournament_join = async (req, res, next) => {
             }
         }
 
-        console.log(tournaments);
+        tournament = await Tournament.findById(req.params.tournamentId)
+            .populate({
+                path: 'teams',
+                populate: {path: 'captain', select: '_id'}
+            })
+            .populate('owner')
+            .select('winnerTeam started finished name teamCount prizePool teams bracket owner description')
+            .session(session);
+
+        console.log(tournament);
         const response = {
-            status: "ok",
-            updatedTournament: tournaments
+            successful: true,
+            updatedTournament: tournament
         };
 
         res.status(200).json(response);

@@ -285,7 +285,7 @@ exports.user_get_roles = (req, res, next) => {
 
 exports.user_get_teams = async (req, res, next) => {
     try {
-        const teams = await Team.find({players: req.params.userId});
+        const teams = await Team.find({players: req.params.userId}).populate('captain');
         res.status(200).json({
             successful: true,
             teams: teams
