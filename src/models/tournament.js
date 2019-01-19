@@ -10,6 +10,8 @@ const tournamentSchema = mongoose.Schema({
     name: {type: String, required: true, unique: true},
     teamCount: {type: Number, enum: [4, 8, 16, 32, 64]},
     prizePool: Number,
+    prizePoolCurrency: String,
+    startWhenReady: {type: Boolean, default: false}, //TODO: убрать или реализовать
     finished: {type: Boolean, default: false},
     started: {type: Boolean, default: false},
     winnerTeam: {type: mongoose.Schema.Types.ObjectId, default: null},
@@ -26,7 +28,8 @@ const tournamentSchema = mongoose.Schema({
         finished: {type: Boolean, required: true, default: false}, //confirmed
         matchId: Number,
         firstTeamWin: Boolean,
-    }]
+    }],
+    contacts: [{contactType: String, contactText: String}]
 });
 
 function teamLimit(val) {

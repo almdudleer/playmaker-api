@@ -13,6 +13,10 @@ exports.tournament_post_one = async (req, res, next) => {
             name: req.body.name,
             teamCount: req.body.teamCount,
             prizePool: req.body.prizePool,
+            prizePoolCurrency: req.body.prizePoolCurrency,
+            startWhenReady: req.body.startWhenReady,
+            description: req.body.description,
+            contacts: req.body.contacts
         });
         tournament = await tournament.save();
         res.status(200).json({
