@@ -104,7 +104,7 @@ exports.tournament_join = async (req, res, next) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     try {
-        const team = await Team.findByIdAndUpdate(req.body.teamId).populate('players');
+        const team = await Team.findById(req.body.teamId).populate('players').session(session);
 
         if (!team) {
             res.status(404).json({error: "team not found"});
@@ -123,7 +123,7 @@ exports.tournament_join = async (req, res, next) => {
             return;
         }
 
-        if (team.players.length < 5) {
+        /*if (team.players.length < 5) {
             res.status(200).json({
                 successful: false,
                 error: "Less then 5 players"
@@ -131,7 +131,7 @@ exports.tournament_join = async (req, res, next) => {
             await session.abortTransaction();
             session.endSession();
             return;
-        }
+        }*/
 
         let tournament = await Tournament.findOneAndUpdate(
             {_id: req.params.tournamentId},
@@ -164,7 +164,7 @@ exports.tournament_join = async (req, res, next) => {
             return;
         }
 
-        for (let i = 0; i < tournament.teams.length; i++) {
+        /*for (let i = 0; i < tournament.teams.length; i++) {
             for (let j = 0; j < team.players.length; j++) {
                 if (tournament.teams[i].players.indexOf(team.players[j]._id) > -1) {
                     res.status(200).json({
@@ -176,18 +176,43 @@ exports.tournament_join = async (req, res, next) => {
                     return;
                 }
             }
-        }
+        }*/
 
-        tournament = await Tournament.findById(req.params.tournamentId)
+        tournament = await Tournament.findOne({_id: req.params.tournamentId})
             .populate({
                 path: 'teams',
-                populate: {path: 'captain', select: '_id'}
+                populate: [{path: 'captain', select: '_id'}, {path: 'players', select: 'jid'}]
             })
-            .populate('owner')
-            .select('winnerTeam started finished name teamCount prizePool teams bracket owner description')
+            .populate({path: 'owner', select: '_id email jid'})
+            .select('winnerTeam startWhenReady started finished name teamCount prizePool teams bracket owner description')
             .session(session);
 
-        console.log(tournament);
+
+        if (tournament.startWhenReady && tournament.teams.length === tournament.teamCount) {
+            tournament.generateBracket();
+            tournament.started = true;
+
+            tournament = await tournament.save();
+
+            for (let i = 0; i < tournament.teams.length; i++) {
+                console.log(1);
+                for (let j = 0; j < tournament.teams[i].players.length; j++) {
+                    if (tournament.teams[i].players[j].jid) {
+                        console.log(tournament.teams[i].players[j].jid);
+                        xmpp.send(tournament.teams[i].players[j].jid, `Tournament ${tournament.name} has been started`);
+                    }
+                }
+            }
+
+            let subs = User.find({selectedTournaments: tournament._id});
+
+            for (let i = 0; i < subs.length; i++) {
+                if (subs[i].jid) {
+                    xmpp.send(subs[i].jid, `Tournament ${tournament.name} has been started`)
+                }
+            }
+        }
+
         const response = {
             successful: true,
             updatedTournament: tournament
@@ -267,11 +292,12 @@ exports.tournament_start = async (req, res, next) => {
         let tournament = await Tournament.findOne({_id: req.params.tournamentId})
             .populate({
                 path: 'teams',
-                populate: {path: 'captain', select: '_id'}
+                populate: [{path: 'captain', select: '_id'}, {path: 'players', select: 'jid'}]
             })
-            .populate('owner')
+            .populate({path: 'owner', select: '_id email jid'})
             .select('winnerTeam started finished name teamCount prizePool teams bracket owner description')
             .exec();
+        console.log(JSON.stringify(tournament));
         if (tournament) {
             /*if (tournament.started) return res.status(200).json({
                 successful: false,
