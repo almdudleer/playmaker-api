@@ -10,8 +10,9 @@ const matchSchema = mongoose.Schema({
     barracks_status_dire: Number,
     radiant_score: Number,
     dire_score: Number,
-    radiant_team: mongoose.Schema.Types.ObjectId,
-    dire_team: mongoose.Schema.Types.ObjectId,
+    radiant_win: Boolean,
+    radiant_team: { type: mongoose.Schema.Types.ObjectId, ref: 'Team'},
+    dire_team: { type: mongoose.Schema.Types.ObjectId, ref: 'Team'},
     tournament: mongoose.Schema.Types.ObjectId,
     players: [{
         _id: false,

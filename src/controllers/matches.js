@@ -130,6 +130,8 @@ exports.match_get_one = async (req, res, next) => {
 
         let match = req.query.parsed ? await ParsedMatch.findOne({_id: req.params.matchId}).exec() :
             await Match.findOne({_id: req.params.matchId})
+                .populate('dire_team')
+                .populate('radiant_team')
                 .populate('players.item_0')
                 .populate('players.item_1')
                 .populate('players.item_2')
@@ -153,6 +155,7 @@ exports.match_get_one = async (req, res, next) => {
             });
         }
     } catch (err) {
+        console.log(err);
         res.status(500).json({error: err})
     }
 };
