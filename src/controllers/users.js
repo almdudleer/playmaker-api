@@ -295,6 +295,18 @@ exports.user_get_teams = async (req, res, next) => {
     }
 };
 
+exports.user_get_tournaments = async (req, res, next) => {
+    try {
+        const tournaments = await Tournament.find({owner: req.params.userId});
+        res.status(200).json({
+            successful: true,
+            tournaments: tournaments
+        })
+    } catch (err) {
+        res.status(500).json({error: err});
+    }
+};
+
 exports.user_confirm_email = async (req, res, next) => {
     await User.findOneAndUpdate({
         confirmKey: req.params.key

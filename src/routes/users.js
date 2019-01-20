@@ -44,6 +44,8 @@ router.get('/avatar/:username', UserController.get_avatar);
 
 router.get('/teams/:userId', UserController.user_get_teams);
 
+router.get('/tournaments/:userId', UserController.user_get_tournaments);
+
 router.get('/invites', Auth.isLoggedIn, UserController.user_get_invites);
 
 router.get('/confirm/:key', UserController.user_confirm_email);
