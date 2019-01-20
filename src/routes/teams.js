@@ -19,4 +19,6 @@ router.post('/:teamId/join', Auth.isLoggedIn, TeamsController.team_join);
 
 router.get('/:teamId/tournaments', TeamsController.team_get_tournaments);
 
+router.get('/:teamId/matches', TeamsController.team_get_matches);
+
 module.exports = router;

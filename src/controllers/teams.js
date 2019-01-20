@@ -3,6 +3,8 @@ const User = require('../models/user');
 const Tournament = require('../models/tournament');
 const mongoose = require('mongoose');
 const xmpp = require('simple-xmpp');
+const Match = require('../models/match');
+const heroNames = require('../util/heroes');
 require('dotenv').config();
 
 exports.team_post_one = async (req, res, next) => {
@@ -288,6 +290,35 @@ exports.team_get_tournaments = async (req, res, next) => {
             successful: true,
             tournaments: tournaments
         });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({error: err})
+    }
+};
+
+exports.team_get_matches = async (req, res, next) => {
+    try {
+        let limit = +req.query.limit || 0;
+        console.log(req.params.teamId);
+        const matches = await Match.find({
+            $or: [{radiant_team: req.params.teamId}, {dire_team: req.params.teamId}]
+        })
+            .select('_id start_time lobby_time players.player_slot players.account_id players.hero_id')
+            .limit(limit)
+            .exec();
+
+        for (let i = 0; i < matches.length; i++) {
+            for (let j = 0; j < matches[i].players.length; j++) {
+                matches[i].players[j].hero_name = heroNames[matches[i].players[j].hero_id].name;
+            }
+        }
+
+        const response = {
+            status: "ok",
+            matches: matches
+        };
+
+        res.status(200).json(response);
     } catch (err) {
         console.log(err);
         res.status(500).json({error: err})
