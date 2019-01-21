@@ -246,18 +246,57 @@ exports.user_delete_tournament = (req, res, next) => {
 };
 
 exports.user_restore_password = (req, res, next) => {
+    let userEmail;
+
     User.findOne({email: req.body.userEmail}) //проверить, что email существует
         .exec()
         .then(doc => {
-            //TODO: if doc !=null send e-mail with password or else
+            if (doc != null) userEmail = req.body.userEmail;
             const response = {
                 status: doc ? "ok" : "fail"
             };
+
+            if (userEmail) {
+                const transporter = nodemailer.createTransport({
+                    service: 'Gmail',
+                    auth: {
+                        user: process.env.GMAIL_USER,
+                        pass: process.env.GMAIL_PWD,
+                    },
+                });
+
+                const randomKey = crypto.randomBytes(40).toString('hex');
+
+                // TODO: разхардкодить ссылку в письме
+                const mailOptions = {
+                    from: process.env.GMAIL_USER,
+                    to: userEmail,
+                    subject: 'Restore password',
+                    html: '<p><a href="http://localhost:4200/restore/' + randomKey + '">Подтвердить</a></p><br>' +
+                        '<p>http://localhost:4200/restore/' + randomKey + '</p>',
+                };
+
+                User.findOneAndUpdate({email: userEmail}, {restoreKey: randomKey})
+                    .exec()
+                    .then((doc) => {
+                            transporter.sendMail(mailOptions, (error, info) => {
+                                if (error) {
+                                    console.log(error);
+                                }
+                            })
+                        }
+                    );
+            }
             res.status(200).json(response);
         })
         .catch(err => {
             res.status(500).json({error: err})
-        })
+        });
+};
+
+exports.user_confirm_restore = (req, res, next) => {
+    User.findOneAndUpdate({restoreKey: req.params.userRestoreKey}, {restoreKey: null})
+    // TODO: посолить, поперчить поставить пароль req.body.password, кинуть 404, если не нашлось такого ключа
 };
 
 exports.user_logout = (req, res, next) => {
