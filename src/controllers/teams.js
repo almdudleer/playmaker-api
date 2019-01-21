@@ -43,7 +43,14 @@ exports.team_post_one = async (req, res, next) => {
 
 exports.team_get_all = async (req, res, next) => {
     try {
-        const teams = await Team.find()
+        let limit = +req.query.limit || 0;
+        let skip = +req.query.skip || 0;
+
+        let searchQuery = req.query.searchQuery ?
+            {name: {$regex: req.query.searchQuery, $options: 'i'}} : {};
+        const teams = await Team.find(searchQuery)
+            .skip(skip)
+            .limit(limit)
             .populate('captain', '_id username')
             .populate('players', '_id username')
             .exec();

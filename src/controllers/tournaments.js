@@ -31,8 +31,16 @@ exports.tournament_post_one = async (req, res, next) => {
 
 exports.tournament_get_all = async (req, res, next) => {
     try {
-        const tournaments = await Tournament.find()
+        let limit = +req.query.limit || 0;
+        let skip = +req.query.skip || 0;
+        let searchQuery = req.query.searchQuery ? {
+            $text: {$search: req.query.searchQuery}
+        } : {};
+
+        const tournaments = await Tournament.find(searchQuery)
             .select('name teamCount prizePool teams bracket owner description')
+            .skip(skip)
+            .limit(limit)
             .populate('owner', '_id username')
             .exec();
         const response = {
