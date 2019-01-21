@@ -54,4 +54,6 @@ router.post('/fav/follow/:tournamentId', UserController.user_add_tournament);
 
 router.post('/fav/unfollow/:tournamentId', UserController.user_delete_tournament);
 
+router.post('/restorePass', UserController.user_restore_password);
+
 module.exports = router;
