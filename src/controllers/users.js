@@ -295,8 +295,10 @@ exports.user_restore_password = (req, res, next) => {
 };
 
 exports.user_confirm_restore = (req, res, next) => {
-    User.findOneAndUpdate({restoreKey: req.params.userRestoreKey}, {restoreKey: null})
-    // TODO: посолить, поперчить поставить пароль req.body.password, кинуть 404, если не нашлось такого ключа
+    console.log('restoreKey ', req.params.userRestoreKey, 'password ', req.body.password);
+    res.status(503).json({status: "Under construction"});
+    // User.findOneAndUpdate({restoreKey: req.params.userRestoreKey}, {restoreKey: null})
+    // TODO: посолить, поперчить поставить юзеру пароль req.body.password, кинуть 404, если не нашлось такого ключа
 };
 
 exports.user_logout = (req, res, next) => {
