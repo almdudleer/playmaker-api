@@ -23,12 +23,31 @@ exports.match_post_one = async (req, res, next) => {
                 key: process.env.STEAM_API_KEY
             }
         });
+
+        const playersSummaries = await axios.get(steamApi.getPlayerSummaries, {
+            params: {
+                key: process.env.STEAM_API_KEY,
+                steamids: resp.data.result.players.map((player) => {
+                    return '765' + (player.account_id + 61197960265728);
+                }).join()
+            }
+        });
+
+        let nicknames = {};
+
+        playersSummaries.data.response.players.forEach((user) => {
+            nicknames[user.steamid] = user.personaname;
+        });
+
+
         resp.data.result._id = resp.data.result.match_id;
         for (let i = 0; i < resp.data.result.players.length; i++) {
+            let steamId64 = '765' + (resp.data.result.players[i].account_id + 61197960265728);
             resp.data.result.players[i].hero_name = heroNames[resp.data.result.players[i].hero_id].name;
             resp.data.result.players[i].ability_upgrades.forEach((ability) => {
                 ability.name = abilities[ability.ability];
             });
+            resp.data.result.players[i].nickname = nicknames[steamId64] || 'Anonymous';
         }
 
         const match = new Match(resp.data.result);
