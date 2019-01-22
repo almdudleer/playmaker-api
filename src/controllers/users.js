@@ -364,7 +364,7 @@ exports.user_confirm_email = async (req, res, next) => {
         confirmed: true,
         confirmKey: null
     });
-    res.status(200).json({kek: "kek"});
+    res.redirect(process.env.FRONTEND_URL);
 };
 
 exports.user_delete_openid = async (req, res, next) => {

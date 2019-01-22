@@ -24,7 +24,7 @@ router.get('/steam/add', passport.authenticate('steam'));
 router.get('/steam/login', Auth.isLoggedOut, passport.authenticate('steam'));
 
 router.get('/steam/login/return', passport.authenticate('steam', {failureRedirectL: '/login'}), (req, res, next) => {
-    res.redirect('http://localhost:4200');
+    res.redirect(process.env.FRONTEND_URL);
 });
 
 router.post('/logout', Auth.isLoggedIn, UserController.user_logout);
