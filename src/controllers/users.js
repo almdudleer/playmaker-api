@@ -100,8 +100,8 @@ exports.user_update = async (req, res, next) => {
 
         if (req.body.currentPass && req.body.newPass) {
             await req.user.changePassword(req.body.currentPass, req.body.newPass);
-            //TODO: закрывать сессии при смене пароля
-            //mongoose.connection.db.collection('sessions').deleteMany({"session.passport.user": user.username});
+            await mongoose.connection.db.collection('sessions').deleteMany({"session.passport.user": req.user.username});
+            await req.session.save();
         }
 
 
