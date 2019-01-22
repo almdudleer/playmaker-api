@@ -64,7 +64,7 @@ module.exports.user_signup = (req, res, next) => {
 exports.user_email_exists = async (req, res, next) => {
     const user = await User.findOne(
         {
-            email: {$regex: '^' + req.query.email + '$', $options:'i'}
+            email: {$regex: '^' + req.query.email + '$', $options: 'i'}
         }
     ).exec();
     res.status(200).json({
@@ -75,7 +75,7 @@ exports.user_email_exists = async (req, res, next) => {
 exports.user_username_exists = async (req, res, next) => {
     const user = await User.findOne(
         {
-            username: {$regex: '^' + req.query.username + '$', $options:'i'}
+            username: {$regex: '^' + req.query.username + '$', $options: 'i'}
         }
     ).exec();
     res.status(200).json({
@@ -85,20 +85,25 @@ exports.user_username_exists = async (req, res, next) => {
 
 exports.user_update = async (req, res, next) => {
     try {
-        let update = {};
+        console.log(req.body);
+        const update = {
+            jid: req.body.jid || req.user.jid,
+            email: req.body.email || req.user.email
+        };
+
         if (req.files[0]) {
-            update = {
-                jid: req.body.jid || req.user.jid,
-                avatar: {
-                    data: req.files[0].buffer,
-                    contentType: req.files[0].mimetype
-                }
-            }
-        } else {
-            update = {
-                jid: req.body.jid || req.user.jid
+            update.avatar = {
+                data: req.files[0].buffer,
+                contentType: req.files[0].mimetype
             }
         }
+
+        if (req.body.currentPass && req.body.newPass) {
+            await req.user.changePassword(req.body.currentPass, req.body.newPass);
+            //TODO: закрывать сессии при смене пароля
+            //mongoose.connection.db.collection('sessions').deleteMany({"session.passport.user": user.username});
+        }
+
 
         let user = await User.findByIdAndUpdate(req.user._id, update, {new: true});
         if (req.body.jid) {
