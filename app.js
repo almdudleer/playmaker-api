@@ -33,7 +33,8 @@ mongoose.set('useFindAndModify', false);
 //Auth
 app.use(session({
     store: new MongoStore({
-        mongooseConnection: mongoose.connection
+        mongooseConnection: mongoose.connection,
+        stringify: false
     }),
     secret: "Tsopa",
     resave: false,

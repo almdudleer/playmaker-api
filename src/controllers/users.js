@@ -13,7 +13,7 @@ module.exports.user_signup = (req, res, next) => {
     let key = crypto.createHash('sha256').update(req.body.username).digest('hex');
     User.register(new User({
         _id: new mongoose.Types.ObjectId,
-        email: req.body.email,
+        email: req.body.email.toLowerCase(),
         confirmed: false,
         confirmKey: key,
         roles: ['USER'],
@@ -245,60 +245,64 @@ exports.user_delete_tournament = (req, res, next) => {
         })
 };
 
-exports.user_restore_password = (req, res, next) => {
-    let userEmail;
+exports.user_restore_password = async (req, res, next) => {
+    try {
+        const randomKey = crypto.randomBytes(40).toString('hex');
 
-    User.findOne({email: req.body.userEmail}) //проверить, что email существует
-        .exec()
-        .then(doc => {
-            if (doc != null) userEmail = req.body.userEmail;
-            const response = {
-                status: doc ? "ok" : "fail"
+        const user = await User.findOneAndUpdate({email: req.body.userEmail.toLowerCase()}, {restoreKey: randomKey}).exec(); //проверить, что email существует
+
+        if (user) {
+            const transporter = nodemailer.createTransport({
+                service: 'Gmail',
+                auth: {
+                    user: process.env.GMAIL_USER,
+                    pass: process.env.GMAIL_PWD,
+                },
+            });
+
+            const mailOptions = {
+                from: process.env.GMAIL_USER,
+                to: user.email,
+                subject: 'Restore password from Playmaker',
+                html: `<p><a href="${process.env.FRONTEND_URL}/restore/${randomKey}">Подтвердить</a></p><br>` +
+                    `<p>${process.env.FRONTEND_URL}/restore/${randomKey}</p>`,
             };
 
-            if (userEmail) {
-                const transporter = nodemailer.createTransport({
-                    service: 'Gmail',
-                    auth: {
-                        user: process.env.GMAIL_USER,
-                        pass: process.env.GMAIL_PWD,
-                    },
-                });
-
-                const randomKey = crypto.randomBytes(40).toString('hex');
-
-                // TODO: разхардкодить ссылку в письме
-                const mailOptions = {
-                    from: process.env.GMAIL_USER,
-                    to: userEmail,
-                    subject: 'Restore password',
-                    html: '<p><a href="http://localhost:4200/restore/' + randomKey + '">Подтвердить</a></p><br>' +
-                        '<p>http://localhost:4200/restore/' + randomKey + '</p>',
-                };
-
-                User.findOneAndUpdate({email: userEmail}, {restoreKey: randomKey})
-                    .exec()
-                    .then((doc) => {
-                            transporter.sendMail(mailOptions, (error, info) => {
-                                if (error) {
-                                    console.log(error);
-                                }
-                            })
-                        }
-                    );
-            }
-            res.status(200).json(response);
-        })
-        .catch(err => {
-            res.status(500).json({error: err})
+            transporter.sendMail(mailOptions, (error, info) => {
+                if (error) {
+                    console.log(error);
+                }
+            });
+        }
+        res.status(200).json({
+            successful: !!user
         });
+    } catch (e) {
+        console.log(e);
+        res.status(500).json({error: e});
+    }
+
 };
 
-exports.user_confirm_restore = (req, res, next) => {
+exports.user_confirm_restore = async (req, res, next) => {
     console.log('restoreKey ', req.params.userRestoreKey, 'password ', req.body.password);
-    res.status(503).json({status: "Under construction"});
-    // User.findOneAndUpdate({restoreKey: req.params.userRestoreKey}, {restoreKey: null})
-    // TODO: посолить, поперчить поставить юзеру пароль req.body.password, кинуть 404, если не нашлось такого ключа
+    try {
+        const user = await User.findOneAndUpdate({restoreKey: req.params.userRestoreKey}, {restoreKey: null}).exec();
+        if (user) {
+            await user.setPassword(req.body.password);
+            mongoose.connection.db.collection('sessions').deleteMany({"session.passport.user": user.username});
+            await user.save();
+            res.status(200).json({
+                successful: true
+            });
+        } else {
+            res.sendStatus(404);
+        }
+    } catch (err) {
+        res.status(500).json({
+            error: err
+        })
+    }
 };
 
 exports.user_logout = (req, res, next) => {
@@ -308,7 +312,7 @@ exports.user_logout = (req, res, next) => {
     })
 };
 
-exports.user_get_roles = (req, res, next) => {
+exports.user_get_roles = async (req, res, next) => {
     if (req.user) {
         res.status(200).json({
             status: "ok",
