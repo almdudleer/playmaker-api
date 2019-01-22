@@ -81,7 +81,9 @@ app.use(bodyParser.json());
 
 //Cross-origin resource sharing
 const originsWhitelist = [
-    'http://localhost:4200'
+    'http://localhost:4200',
+    'http://playmaker.gq',
+    'http://playmaker.gq:4200'
 ];
 
 const corsOptions = {
