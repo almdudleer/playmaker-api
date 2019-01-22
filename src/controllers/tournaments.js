@@ -59,7 +59,9 @@ exports.tournament_get_all = async (req, res, next) => {
             }
         }
 
-        const tournaments = await Tournament.find(searchQuery)
+        const tournaments = await Tournament
+            .find(searchQuery)
+            .sort({createdAt: -1})
             .select('name winnerTeam teamCount prizePool prizePoolCurrency startWhenReady started finished teams bracket owner description')
             .skip(skip)
             .limit(limit)

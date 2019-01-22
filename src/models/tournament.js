@@ -29,7 +29,11 @@ const tournamentSchema = mongoose.Schema({
         matchId: Number,
         firstTeamWin: Boolean,
     }],
-    contacts: [{contactType: String, contactText: String}]
+    contacts: [{contactType: String, contactText: String}],
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
 });
 
 function teamLimit(val) {
