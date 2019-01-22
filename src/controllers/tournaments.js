@@ -60,10 +60,11 @@ exports.tournament_get_all = async (req, res, next) => {
         }
 
         const tournaments = await Tournament.find(searchQuery)
-            .select('name teamCount prizePool prizePoolCurrency startWhenReady teams bracket owner description started finished')
+            .select('name winnerTeam teamCount prizePool prizePoolCurrency startWhenReady started finished teams bracket owner description')
             .skip(skip)
             .limit(limit)
             .populate('owner', '_id username')
+            .populate('winnerTeam', '_id name')
             .exec();
         const response = {
             status: "ok",
@@ -71,13 +72,11 @@ exports.tournament_get_all = async (req, res, next) => {
             tournaments: tournaments
         };
         res.status(200).json(response);
-    } catch
-        (err) {
+    } catch (err) {
         res.status(500).json({error: err})
     }
 
-}
-;
+};
 
 exports.tournament_get_one = async (req, res, next) => {
     try {
@@ -86,9 +85,11 @@ exports.tournament_get_one = async (req, res, next) => {
                 path: 'teams',
                 populate: {path: 'captain', select: '_id'}
             })
-            .populate('owner')
-            .select('winnerTeam started finished name teamCount prizePool teams bracket owner description')
+            .populate('owner', '_id username')
+            .populate('winnerTeam', '_id name')
+            .select('winnerTeam started finished name prizePoolCurrency teamCount prizePool teams bracket owner description')
             .exec();
+        console.log(tournament);
         const response = {
             status: "ok",
             tournament: tournament

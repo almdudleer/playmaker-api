@@ -18,6 +18,7 @@ const matchSchema = mongoose.Schema({
         _id: false,
         account_id: Number,
         player_slot: Number,
+        nickname: {type: String, default: 'Anonymous'},
         hero_id: Number,
         hero_name: String,
         item_0: {type: Number, ref: 'Item'},
