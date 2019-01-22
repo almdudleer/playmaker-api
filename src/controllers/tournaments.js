@@ -31,14 +31,36 @@ exports.tournament_post_one = async (req, res, next) => {
 
 exports.tournament_get_all = async (req, res, next) => {
     try {
+
+        // search query
         let limit = +req.query.limit || 0;
         let skip = +req.query.skip || 0;
-        let searchQuery = req.query.searchQuery ? {
-            $text: {$search: req.query.searchQuery}
-        } : {};
+        let searchQuery = req.query.searchQuery ?
+            {
+                $text: {$search: req.query.searchQuery},
+            }
+            : {};
+
+        // add status to query
+        switch (req.query.tourStatus) {
+            case 'ongoing': {
+                searchQuery.started = true;
+                searchQuery.finished = false;
+                break;
+            }
+            case 'upcoming' : {
+                searchQuery.started = false;
+                searchQuery.finished = false;
+                break;
+            }
+            case 'finished' : {
+                searchQuery.finished = true;
+                break;
+            }
+        }
 
         const tournaments = await Tournament.find(searchQuery)
-            .select('name teamCount prizePool teams bracket owner description')
+            .select('name teamCount prizePool prizePoolCurrency startWhenReady teams bracket owner description started finished')
             .skip(skip)
             .limit(limit)
             .populate('owner', '_id username')
@@ -49,11 +71,13 @@ exports.tournament_get_all = async (req, res, next) => {
             tournaments: tournaments
         };
         res.status(200).json(response);
-    } catch (err) {
+    } catch
+        (err) {
         res.status(500).json({error: err})
     }
 
-};
+}
+;
 
 exports.tournament_get_one = async (req, res, next) => {
     try {

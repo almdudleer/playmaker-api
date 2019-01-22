@@ -11,7 +11,7 @@ const tournamentSchema = mongoose.Schema({
     teamCount: {type: Number, enum: [4, 8, 16, 32, 64]},
     prizePool: Number,
     prizePoolCurrency: String,
-    startWhenReady: {type: Boolean, default: false}, //TODO: убрать или реализовать
+    startWhenReady: {type: Boolean, default: false},
     finished: {type: Boolean, default: false},
     started: {type: Boolean, default: false},
     winnerTeam: {type: mongoose.Schema.Types.ObjectId, default: null},
