@@ -60,7 +60,7 @@ exports.match_post_one = async (req, res, next) => {
         const team2 = await Team.findById(tournament.bracket[req.body.matchNum - 1].team2).session(session);
         //Матч может запостить один из капитанов, если матч еще не был завершен
         //Владелец турнира может запостить даже завершенный матч, обновив его
-        if (!(tournament.owner.equals(req.user._id) ||
+        if (!(tournament.owner.equals(req.user._id) || req.user.roles.includes("ADMIN") ||
             ((team1.captain.equals(req.user._id) || team2.captain.equals(req.user._id))
                 && !tournament.bracket[req.body.matchNum - 1].finished))) {
             return res.status(403).json({
