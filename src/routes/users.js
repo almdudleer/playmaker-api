@@ -58,4 +58,7 @@ router.post('/restorePass', UserController.user_restore_password);
 
 router.post('/reset/:userRestoreKey', UserController.user_confirm_restore);
 
+router.post('/feedback', UserController.user_send_feedback);
+
+
 module.exports = router;

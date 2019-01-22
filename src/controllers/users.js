@@ -393,3 +393,31 @@ exports.user_get_invites = async (req, res, next) => {
         invites: user.invites
     });
 };
+
+exports.user_send_feedback = async (req, res, next) => {
+    const transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+            user: process.env.GMAIL_USER,
+            pass: process.env.GMAIL_PWD,
+        },
+    });
+
+    const mailOptions = {
+        from: process.env.GMAIL_USER,
+        to: process.env.GMAIL_USER,
+        subject: 'Feedback',
+        html: `<p>e-mail: ${req.body.email}</p>
+                <p>message: ${req.body.message}</p>`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log(error);
+        }
+    });
+
+    res.status(200).json({
+        successful:true
+    })
+};
