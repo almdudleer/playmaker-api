@@ -14,7 +14,7 @@ const tournamentSchema = mongoose.Schema({
     startWhenReady: {type: Boolean, default: false}, //TODO: убрать или реализовать
     finished: {type: Boolean, default: false},
     started: {type: Boolean, default: false},
-    winnerTeam: {type: mongoose.Schema.Types.ObjectId, default: null},
+    winnerTeam: {type: mongoose.Schema.Types.ObjectId, default: null, ref: 'Team'},
     teams: {
         type: [{type: mongoose.Schema.Types.ObjectId, ref: 'Team'}],
         validate: [teamLimit, '{PATH} exceeds the limit of teams']
