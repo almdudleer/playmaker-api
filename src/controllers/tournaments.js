@@ -38,7 +38,7 @@ exports.tournament_get_all = async (req, res, next) => {
         } : {};
 
         const tournaments = await Tournament.find(searchQuery)
-            .select('name teamCount prizePool teams bracket owner description')
+            .select('name teamCount prizePool started finished teams bracket owner description')
             .skip(skip)
             .limit(limit)
             .populate('owner', '_id username')
