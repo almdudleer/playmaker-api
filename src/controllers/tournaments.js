@@ -216,11 +216,12 @@ exports.tournament_join = async (req, res, next) => {
         tournament = await Tournament.findOne({_id: req.params.tournamentId})
             .populate({
                 path: 'teams',
-                populate: [{path: 'captain', select: '_id'}, {path: 'players', select: 'jid'}]
+                populate: {path: 'captain', select: '_id'}
             })
-            .populate({path: 'owner', select: '_id email jid'})
-            .select('winnerTeam startWhenReady started finished name teamCount prizePool teams bracket owner description')
-            .session(session);
+            .populate('owner', '_id username')
+            .populate('winnerTeam', '_id name')
+            .select('winnerTeam startWhenReady started finished name prizePoolCurrency teamCount prizePool teams bracket owner description')
+            .exec();
 
 
         if (tournament.startWhenReady && tournament.teams.length === tournament.teamCount) {
