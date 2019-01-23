@@ -331,7 +331,7 @@ exports.tournament_start = async (req, res, next) => {
                 populate: [{path: 'captain', select: '_id'}, {path: 'players', select: 'jid'}]
             })
             .populate({path: 'owner', select: '_id email jid'})
-            .select('winnerTeam started finished name teamCount prizePool teams bracket owner description')
+            .select('winnerTeam started finished name teamCount prizePool prizePoolCurrency teams bracket owner description')
             .exec();
         console.log(JSON.stringify(tournament));
         if (tournament) {
