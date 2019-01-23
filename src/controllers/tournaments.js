@@ -89,7 +89,7 @@ exports.tournament_get_one = async (req, res, next) => {
             })
             .populate('owner', '_id username')
             .populate('winnerTeam', '_id name')
-            .select('winnerTeam started finished name prizePoolCurrency teamCount prizePool teams bracket owner description')
+            .select('winnerTeam startWhenReady started finished name prizePoolCurrency teamCount prizePool teams bracket owner description')
             .exec();
         console.log(tournament);
         const response = {
